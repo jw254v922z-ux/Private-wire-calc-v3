@@ -1,4 +1,14 @@
 {
   "buildCommand": "pnpm build",
-  "outputDirectory": "dist"
+  "startCommand": "pnpm start",
+  "outputDirectory": "dist",
+  "framework": "other",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "server/_core/index.ts": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }
