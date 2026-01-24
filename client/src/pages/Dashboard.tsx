@@ -350,6 +350,18 @@ export default function Dashboard() {
                       onValueChange={(v) => handleInputChange("mw", v[0])} 
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Project Life (Years)</Label>
+                      <span className="text-sm font-mono">{inputs.projectLife} years</span>
+                    </div>
+                    <Slider 
+                      value={[inputs.projectLife]} 
+                      min={5} max={30} step={1} 
+                      onValueChange={(v) => handleInputChange("projectLife", v[0])} 
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -361,9 +373,9 @@ export default function Dashboard() {
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.capexPerMW)}</span>
                     </div>
                     <Input 
-                      type="number" 
-                      value={inputs.capexPerMW} 
-                      onChange={(e) => handleInputChange("capexPerMW", Number(e.target.value))} 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.capexPerMW)} 
+                      onChange={(e) => handleInputChange("capexPerMW", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
 
@@ -379,9 +391,9 @@ export default function Dashboard() {
                       </div>
                     )}
                     <Input 
-                      type="number" 
-                      value={inputs.privateWireCost} 
-                      onChange={(e) => handleInputChange("privateWireCost", Number(e.target.value))} 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.privateWireCost)} 
+                      onChange={(e) => handleInputChange("privateWireCost", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
 
@@ -391,9 +403,9 @@ export default function Dashboard() {
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.developmentPremiumPerMW)}</span>
                     </div>
                     <Input 
-                      type="number" 
-                      value={inputs.developmentPremiumPerMW} 
-                      onChange={(e) => handleInputChange("developmentPremiumPerMW", Number(e.target.value))} 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.developmentPremiumPerMW)} 
+                      onChange={(e) => handleInputChange("developmentPremiumPerMW", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
                 </div>
@@ -407,9 +419,9 @@ export default function Dashboard() {
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.opexPerMW)}</span>
                     </div>
                     <Input 
-                      type="number" 
-                      value={inputs.opexPerMW} 
-                      onChange={(e) => handleInputChange("opexPerMW", Number(e.target.value))} 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.opexPerMW)} 
+                      onChange={(e) => handleInputChange("opexPerMW", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
 
@@ -419,9 +431,9 @@ export default function Dashboard() {
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.powerPrice)}</span>
                     </div>
                     <Input 
-                      type="number" 
-                      value={inputs.powerPrice} 
-                      onChange={(e) => handleInputChange("powerPrice", Number(e.target.value))} 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.powerPrice)} 
+                      onChange={(e) => handleInputChange("powerPrice", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
 
@@ -455,9 +467,9 @@ export default function Dashboard() {
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.exportPrice)}</span>
                     </div>
                     <Input 
-                      type="number" 
-                      value={inputs.exportPrice} 
-                      onChange={(e) => handleInputChange("exportPrice", Number(e.target.value))} 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.exportPrice)} 
+                      onChange={(e) => handleInputChange("exportPrice", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
 
@@ -535,12 +547,12 @@ export default function Dashboard() {
           {/* Main Charts Area */}
           <div className="lg:col-span-8 space-y-6">
             
-            <Tabs defaultValue="cashflow" className="w-full">
+            <Tabs defaultValue="gridcosts" className="w-full">
               <TabsList className="grid w-full grid-cols-4 mb-4">
+                <TabsTrigger value="gridcosts">Private Wire Parameters</TabsTrigger>
                 <TabsTrigger value="cashflow">Cash Flow Analysis</TabsTrigger>
                 <TabsTrigger value="cumulative">Cumulative Returns</TabsTrigger>
                 <TabsTrigger value="generation">Generation & Revenue</TabsTrigger>
-                <TabsTrigger value="gridcosts">Grid Connection</TabsTrigger>
               </TabsList>
               
               <TabsContent value="cashflow">

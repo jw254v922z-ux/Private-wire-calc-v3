@@ -217,7 +217,7 @@ export function calculateGridConnectionCost(params: {
   // Wayleaves costs (annual, multiplied by years)
   const wayleavesCost = {
     min: agriculturalDist * WAYLEAVE_RATES.agricultural.min * wayleaveYears,
-    max: agriculturalDist * WAYLEAVE_RATES.arable.max * wayleaveYears,
+    max: roadDist * WAYLEAVE_RATES.arable.max * wayleaveYears,
   };
 
   // Land rights and planning costs
