@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
+import { calculateGridConnectionCost } from "@/lib/gridConnectionCosts";
 
 interface GridConnectionSliderProps {
   onCostsUpdate: (costs: GridConnectionCosts) => void;
@@ -12,136 +13,80 @@ interface GridConnectionSliderProps {
 
 export interface GridConnectionCosts {
   distance: number;
-  transformerCount: number;
-  voltage: string;
   cableVoltage: string;
-  joints: number;
-  agriculturalTrenchingMin: number;
-  agriculturalTrenchingMax: number;
-  roadTrenchingMin: number;
-  roadTrenchingMax: number;
-  majorRoadCrossingsMin: number;
-  majorRoadCrossingsMax: number;
-  jointBaysMin: number;
-  jointBaysMax: number;
-  transformersMin: number;
-  transformersMax: number;
-  landRightsCompensationMin: number;
-  landRightsCompensationMax: number;
-  landRightsLegalMin: number;
-  landRightsLegalMax: number;
-  planningFeesMin: number;
-  planningFeesMax: number;
-  planningConsentsMin: number;
-  planningConsentsMax: number;
-  constructionMin: number;
-  constructionMax: number;
-  softCostsMin: number;
-  softCostsMax: number;
-  projectMin: number;
-  projectMax: number;
+  stepDownVoltage: string;
+  stepUpTransformerCount: number;
+  stepDownTransformerCount: number;
+  roadPercentage: number;
+  roadCrossings: number;
+  cableCostMin: number;
+  cableCostMax: number;
+  stepUpCostMin: number;
+  stepUpCostMax: number;
+  stepDownCostMin: number;
+  stepDownCostMax: number;
+  jointBayCostMin: number;
+  jointBayCostMax: number;
+  roadCrossingCostMin: number;
+  roadCrossingCostMax: number;
+  terminationCostMin: number;
+  terminationCostMax: number;
+  landRightsCostMin: number;
+  landRightsCostMax: number;
+  totalCostMin: number;
+  totalCostMax: number;
 }
 
-// Cost rates per km for different trench types
-const COST_RATES = {
-  agricultural: { min: 200000, max: 350000 }, // £ per km
-  road: { min: 600000, max: 1200000 }, // £ per km
-  roadCrossing: { min: 150000, max: 300000 }, // £ per crossing
-  jointBay: { min: 30000, max: 40000 }, // £ per joint
-  transformer: {
-    "33/11": { min: 250000, max: 400000 },
-    "33/6.6": { min: 250000, max: 400000 },
-    "11/0.4": { min: 50000, max: 100000 },
-  },
-};
+const CABLE_VOLTAGE_OPTIONS = ["6", "11", "33", "66", "132"];
+const STEPDOWN_VOLTAGE_OPTIONS = ["0.4", "6.6", "11"];
 
 export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderProps) {
   const [distance, setDistance] = useState(3);
-  const [transformerCount, setTransformerCount] = useState(2);
-  const [voltage, setVoltage] = useState("33/11");
   const [cableVoltage, setCableVoltage] = useState("33");
+  const [stepDownVoltage, setStepDownVoltage] = useState("11");
+  const [stepUpTransformerCount, setStepUpTransformerCount] = useState(1);
+  const [stepDownTransformerCount, setStepDownTransformerCount] = useState(2);
   const [roadPercentage, setRoadPercentage] = useState(50);
-  const [majorRoadCrossings, setMajorRoadCrossings] = useState(2);
+  const [roadCrossings, setRoadCrossings] = useState(2);
 
-  // Calculate joints based on distance (approximately 1 joint per 500m)
-  const joints = Math.ceil((distance * 1000) / 500);
-
-  // Calculate trenching costs
-  const agriculturalDistance = (distance * (100 - roadPercentage)) / 100;
-  const roadDistance = (distance * roadPercentage) / 100;
-
-  const agriculturalTrenchingMin = agriculturalDistance * COST_RATES.agricultural.min;
-  const agriculturalTrenchingMax = agriculturalDistance * COST_RATES.agricultural.max;
-  const roadTrenchingMin = roadDistance * COST_RATES.road.min;
-  const roadTrenchingMax = roadDistance * COST_RATES.road.max;
-
-  // Calculate road crossing costs
-  const majorRoadCrossingsMin = majorRoadCrossings * COST_RATES.roadCrossing.min;
-  const majorRoadCrossingsMax = majorRoadCrossings * COST_RATES.roadCrossing.max;
-
-  // Calculate joint bay costs
-  const jointBaysMin = joints * COST_RATES.jointBay.min;
-  const jointBaysMax = joints * COST_RATES.jointBay.max;
-
-  // Calculate transformer costs based on voltage
-  const transformerCosts = COST_RATES.transformer[voltage as keyof typeof COST_RATES.transformer] || COST_RATES.transformer["33/11"];
-  const transformersMin = transformerCount * transformerCosts.min;
-  const transformersMax = transformerCount * transformerCosts.max;
-
-  // Land rights and planning costs (relatively fixed)
-  const landRightsCompensationMin = 20000;
-  const landRightsCompensationMax = 60000;
-  const landRightsLegalMin = 50000;
-  const landRightsLegalMax = 90000;
-  const planningFeesMin = 600;
-  const planningFeesMax = 1200;
-  const planningConsentsMin = 15000;
-  const planningConsentsMax = 40000;
-
-  // Calculate totals
-  const constructionMin = agriculturalTrenchingMin + roadTrenchingMin + majorRoadCrossingsMin + jointBaysMin + transformersMin;
-  const constructionMax = agriculturalTrenchingMax + roadTrenchingMax + majorRoadCrossingsMax + jointBaysMax + transformersMax;
-  const softCostsMin = landRightsCompensationMin + landRightsLegalMin + planningFeesMin + planningConsentsMin;
-  const softCostsMax = landRightsCompensationMax + landRightsLegalMax + planningFeesMax + planningConsentsMax;
-  const projectMin = constructionMin + softCostsMin;
-  const projectMax = constructionMax + softCostsMax;
+  // Calculate costs based on current parameters
+  const costs = calculateGridConnectionCost({
+    distance,
+    roadPercentage,
+    cableVoltage,
+    stepUpTransformerCount,
+    stepDownTransformerCount,
+    roadCrossings,
+  });
 
   // Update parent component with new costs
   useEffect(() => {
     onCostsUpdate({
       distance,
-      transformerCount,
-      voltage,
       cableVoltage,
-      joints,
-      agriculturalTrenchingMin,
-      agriculturalTrenchingMax,
-      roadTrenchingMin,
-      roadTrenchingMax,
-      majorRoadCrossingsMin,
-      majorRoadCrossingsMax,
-      jointBaysMin,
-      jointBaysMax,
-      transformersMin,
-      transformersMax,
-      landRightsCompensationMin,
-      landRightsCompensationMax,
-      landRightsLegalMin,
-      landRightsLegalMax,
-      planningFeesMin,
-      planningFeesMax,
-      planningConsentsMin,
-      planningConsentsMax,
-      constructionMin,
-      constructionMax,
-      softCostsMin,
-      softCostsMax,
-      projectMin,
-      projectMax,
+      stepDownVoltage,
+      stepUpTransformerCount,
+      stepDownTransformerCount,
+      roadPercentage,
+      roadCrossings,
+      cableCostMin: costs.cableCost.min,
+      cableCostMax: costs.cableCost.max,
+      stepUpCostMin: costs.stepUpCost.min,
+      stepUpCostMax: costs.stepUpCost.max,
+      stepDownCostMin: costs.stepDownCost.min,
+      stepDownCostMax: costs.stepDownCost.max,
+      jointBayCostMin: costs.jointBayCost.min,
+      jointBayCostMax: costs.jointBayCost.max,
+      roadCrossingCostMin: costs.roadCrossingCost.min,
+      roadCrossingCostMax: costs.roadCrossingCost.max,
+      terminationCostMin: costs.terminationCost.min,
+      terminationCostMax: costs.terminationCost.max,
+      landRightsCostMin: costs.landRightsCost.min,
+      landRightsCostMax: costs.landRightsCost.max,
+      totalCostMin: costs.totalCost.min,
+      totalCostMax: costs.totalCost.max,
     });
-  }, [distance, transformerCount, voltage, cableVoltage, roadPercentage, majorRoadCrossings]);
-
-
+  }, [distance, cableVoltage, stepDownVoltage, stepUpTransformerCount, stepDownTransformerCount, roadPercentage, roadCrossings]);
 
   const CostSummaryCard = ({ label, min, max }: { label: string; min: number; max: number }) => (
     <div className="p-3 bg-slate-50 rounded-lg border">
@@ -159,42 +104,119 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Grid Connection Cost Calculator</CardTitle>
-        <CardDescription>
-          Adjust parameters to calculate grid connection costs dynamically
-        </CardDescription>
+        <CardDescription>Configure your private wire infrastructure parameters</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent>
         <Tabs defaultValue="parameters" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="parameters">Parameters</TabsTrigger>
-            <TabsTrigger value="costs">Cost Summary</TabsTrigger>
+            <TabsTrigger value="costs">Cost Breakdown</TabsTrigger>
           </TabsList>
 
           <TabsContent value="parameters" className="space-y-6 mt-4">
-            {/* Distance Slider */}
+            {/* Cable Voltage Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Cable Voltage (kV)</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {CABLE_VOLTAGE_OPTIONS.map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setCableVoltage(v)}
+                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${
+                      cableVoltage === v
+                        ? "border-blue-500 bg-blue-50 text-blue-900"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {v} kV
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Selected cable voltage: <span className="font-semibold">{cableVoltage} kV</span>
+              </p>
+            </div>
+
+            {/* Step-Up Transformer (Solar to Cable Voltage) */}
+            <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex justify-between items-center">
+                <Label className="text-base font-semibold">Step-Up Transformers (0.4 kV → {cableVoltage} kV)</Label>
+                <span className="text-2xl font-bold text-amber-600">{stepUpTransformerCount}</span>
+              </div>
+              <Slider
+                value={[stepUpTransformerCount]}
+                min={1}
+                max={5}
+                step={1}
+                onValueChange={(v) => setStepUpTransformerCount(v[0])}
+                className="w-full"
+              />
+              <p className="text-xs text-amber-900">
+                Converts solar output voltage (0.4 kV) to transmission voltage ({cableVoltage} kV)
+              </p>
+            </div>
+
+            {/* Step-Down Transformer Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Step-Down Transformers ({cableVoltage} kV → End-User Voltage)</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {STEPDOWN_VOLTAGE_OPTIONS.map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setStepDownVoltage(v)}
+                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${
+                      stepDownVoltage === v
+                        ? "border-green-500 bg-green-50 text-green-900"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {v} kV
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Selected end-user voltage: <span className="font-semibold">{stepDownVoltage} kV</span>
+              </p>
+            </div>
+
+            {/* Step-Down Transformer Count */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label className="text-base font-semibold">Number of Step-Down Transformers</Label>
+                <span className="text-2xl font-bold text-green-600">{stepDownTransformerCount}</span>
+              </div>
+              <Slider
+                value={[stepDownTransformerCount]}
+                min={1}
+                max={10}
+                step={1}
+                onValueChange={(v) => setStepDownTransformerCount(v[0])}
+                className="w-full"
+              />
+              <p className="text-xs text-slate-500">Number of connection points for end-users</p>
+            </div>
+
+            {/* Cable Distance */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <Label className="text-base font-semibold">Cable Distance (km)</Label>
-                <span className="text-2xl font-bold text-blue-600">{distance.toFixed(1)} km</span>
+                <span className="text-2xl font-bold text-purple-600">{distance.toFixed(1)} km</span>
               </div>
               <Slider
                 value={[distance]}
                 min={0.5}
-                max={10}
+                max={20}
                 step={0.1}
                 onValueChange={(v) => setDistance(v[0])}
                 className="w-full"
               />
-              <p className="text-xs text-slate-500">
-                Calculated joints: <span className="font-semibold">{joints}</span> (1 joint per 500m)
-              </p>
             </div>
 
             {/* Road Percentage */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <Label className="text-base font-semibold">Road Percentage</Label>
-                <span className="text-2xl font-bold text-amber-600">{roadPercentage}%</span>
+                <span className="text-2xl font-bold text-indigo-600">{roadPercentage}%</span>
               </div>
               <Slider
                 value={[roadPercentage]}
@@ -214,130 +236,83 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <Label className="text-base font-semibold">Major Road Crossings</Label>
-                <span className="text-2xl font-bold text-purple-600">{majorRoadCrossings}</span>
+                <span className="text-2xl font-bold text-purple-600">{roadCrossings}</span>
               </div>
               <Slider
-                value={[majorRoadCrossings]}
+                value={[roadCrossings]}
                 min={0}
                 max={5}
                 step={1}
-                onValueChange={(v) => setMajorRoadCrossings(v[0])}
+                onValueChange={(v) => setRoadCrossings(v[0])}
                 className="w-full"
               />
-            </div>
-
-            {/* Transformer Count */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <Label className="text-base font-semibold">Number of Transformers</Label>
-                <span className="text-2xl font-bold text-green-600">{transformerCount}</span>
-              </div>
-              <Slider
-                value={[transformerCount]}
-                min={1}
-                max={10}
-                step={1}
-                onValueChange={(v) => setTransformerCount(v[0])}
-                className="w-full"
-              />
-            </div>
-
-            {/* Voltage Selection */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Transformer Voltage (HV/LV)</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {["33/11", "33/6.6", "11/0.4"].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setVoltage(v)}
-                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${
-                      voltage === v
-                        ? "border-blue-500 bg-blue-50 text-blue-900"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                    }`}
-                  >
-                    {v} kV
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-slate-500 mt-2">
-                Selected: <span className="font-semibold">{voltage} kV</span>
-              </p>
-            </div>
-
-            {/* Cable Voltage */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <Label className="text-base font-semibold">Cable Voltage (kV)</Label>
-                <span className="text-2xl font-bold text-indigo-600">{cableVoltage} kV</span>
-              </div>
-              <Slider
-                value={[parseInt(cableVoltage)]}
-                min={6}
-                max={132}
-                step={1}
-                onValueChange={(v) => setCableVoltage(v[0].toString())}
-                className="w-full"
-              />
-              <div className="text-xs text-slate-500 mt-2">
-                <p>Common voltages: 6, 11, 33, 66, 132 kV</p>
-              </div>
             </div>
 
             {/* Info Box */}
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
               <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-blue-900">
-                Costs are calculated based on industry benchmarks and will be updated in real-time as you adjust parameters.
+                Costs are calculated based on SSEN charging statements and UK industry benchmarks. Adjust parameters to see real-time cost estimates.
               </p>
             </div>
           </TabsContent>
 
           <TabsContent value="costs" className="space-y-4 mt-4">
             <div className="space-y-3">
-              <h3 className="font-semibold text-slate-900">Trenching Costs</h3>
+              <h3 className="font-semibold text-slate-900">Cable Infrastructure</h3>
               <CostSummaryCard
-                label="Agricultural Trenching"
-                min={agriculturalTrenchingMin}
-                max={agriculturalTrenchingMax}
+                label="Cable (Trenching + Installation)"
+                min={costs.cableCost.min}
+                max={costs.cableCost.max}
               />
               <CostSummaryCard
-                label="Road Trenching"
-                min={roadTrenchingMin}
-                max={roadTrenchingMax}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="font-semibold text-slate-900">Infrastructure</h3>
-              <CostSummaryCard
-                label="Major Road Crossings"
-                min={majorRoadCrossingsMin}
-                max={majorRoadCrossingsMax}
+                label="Joint Bays"
+                min={costs.jointBayCost.min}
+                max={costs.jointBayCost.max}
               />
               <CostSummaryCard
-                label={`Joint Bays (${joints} joints)`}
-                min={jointBaysMin}
-                max={jointBaysMax}
-              />
-              <CostSummaryCard
-                label={`Transformers (${transformerCount} × ${voltage} kV)`}
-                min={transformersMin}
-                max={transformersMax}
+                label="Road Crossings (Directional Drill)"
+                min={costs.roadCrossingCost.min}
+                max={costs.roadCrossingCost.max}
               />
             </div>
 
             <div className="space-y-3">
-              <h3 className="font-semibold text-slate-900">Totals</h3>
-              <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-                <p className="text-sm text-green-700 font-medium">Total Project Cost</p>
-                <p className="text-3xl font-bold text-green-900 mt-2">
-                  {formatCurrency(projectMin)} - {formatCurrency(projectMax)}
-                </p>
-                <p className="text-sm text-green-700 mt-2">
-                  Average: {formatCurrency((projectMin + projectMax) / 2)}
-                </p>
-              </div>
+              <h3 className="font-semibold text-slate-900">Transformers & Connections</h3>
+              <CostSummaryCard
+                label={`Step-Up Transformers (0.4 → ${cableVoltage} kV) x${stepUpTransformerCount}`}
+                min={costs.stepUpCost.min}
+                max={costs.stepUpCost.max}
+              />
+              <CostSummaryCard
+                label={`Step-Down Transformers (${cableVoltage} → ${stepDownVoltage} kV) x${stepDownTransformerCount}`}
+                min={costs.stepDownCost.min}
+                max={costs.stepDownCost.max}
+              />
+              <CostSummaryCard
+                label="Terminations & Connections"
+                min={costs.terminationCost.min}
+                max={costs.terminationCost.max}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="font-semibold text-slate-900">Soft Costs</h3>
+              <CostSummaryCard
+                label="Land Rights & Planning"
+                min={costs.landRightsCost.min}
+                max={costs.landRightsCost.max}
+              />
+            </div>
+
+            <div className="p-4 bg-gradient-to-r from-slate-900 to-slate-800 rounded-lg border-2 border-slate-700">
+              <p className="text-xs text-slate-300 font-medium mb-2">TOTAL GRID CONNECTION COST</p>
+              <p className="text-2xl font-bold text-white">
+                {formatCurrency(costs.totalCost.min)} - {formatCurrency(costs.totalCost.max)}
+              </p>
+              <p className="text-sm text-slate-400 mt-2">
+                Average: {formatCurrency((costs.totalCost.min + costs.totalCost.max) / 2)}
+              </p>
             </div>
           </TabsContent>
         </Tabs>

@@ -356,7 +356,14 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Private Wire Cost (£)</Label>
+                    <div className="flex justify-between items-center">
+                      <Label>Private Wire Cost (£)</Label>
+                      {gridConnectionCosts && (
+                        <span className="text-xs text-slate-500">
+                          Grid: {formatCurrency((gridConnectionCosts.totalCostMin + gridConnectionCosts.totalCostMax) / 2)}
+                        </span>
+                      )}
+                    </div>
                     <Input 
                       type="number" 
                       value={inputs.privateWireCost} 
@@ -557,7 +564,7 @@ export default function Dashboard() {
                 <GridConnectionSliders
                   onCostsUpdate={(costs) => {
                     setGridConnectionCosts(costs);
-                    const avgCost = (costs.projectMin + costs.projectMax) / 2;
+                    const avgCost = (costs.totalCostMin + costs.totalCostMax) / 2;
                     handleInputChange("gridConnectionCost", Math.round(avgCost));
                   }}
                 />
