@@ -11,6 +11,9 @@ export interface SolarInputs {
   projectLife: number; // Years
   discountRate: number; // %
   powerPrice: number; // £/MWh
+  percentConsumptionPPA: number; // % of generation consumed at PPA price
+  percentConsumptionExport: number; // % of generation exported at export price
+  exportPrice: number; // £/MWh for exported power
 }
 
 export interface YearData {
@@ -111,7 +114,11 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   for (let year = 1; year <= inputs.projectLife; year++) {
     const opex = annualOpexYear1 * Math.pow(1 + inputs.opexEscalation, year - 1);
     const generation = annualGenYear1 * Math.pow(1 - inputs.degradationRate, year - 1);
-    const revenue = generation * inputs.powerPrice;
+    
+    // Split revenue between PPA consumption and export
+    const ppaConsumption = generation * (inputs.percentConsumptionPPA / 100);
+    const exportGeneration = generation * (inputs.percentConsumptionExport / 100);
+    const revenue = (ppaConsumption * inputs.powerPrice) + (exportGeneration * inputs.exportPrice);
     const cashFlow = revenue - opex; // Capex is 0 for these years
     
     cumulativeCashFlow += cashFlow;
@@ -205,4 +212,7 @@ export const defaultInputs: SolarInputs = {
   projectLife: 15,
   discountRate: 0.10,
   powerPrice: 110,
+  percentConsumptionPPA: 100, // 100% consumed at PPA price by default
+  percentConsumptionExport: 0, // 0% exported by default
+  exportPrice: 50, // Export price typically lower than PPA price
 };

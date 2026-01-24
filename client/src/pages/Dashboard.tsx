@@ -89,6 +89,9 @@ export default function Dashboard() {
         projectLife: model.projectLife,
         discountRate: parseFloat(model.discountRate),
         powerPrice: model.powerPrice,
+        percentConsumptionPPA: model.percentConsumptionPPA || 100,
+        percentConsumptionExport: model.percentConsumptionExport || 0,
+        exportPrice: model.exportPrice || 50,
       });
       setModelName(model.name);
       setModelDescription(model.description || "");
@@ -126,6 +129,9 @@ export default function Dashboard() {
         projectLife: inputs.projectLife,
         discountRate: inputs.discountRate.toString(),
         powerPrice: inputs.powerPrice,
+        percentConsumptionPPA: inputs.percentConsumptionPPA,
+        percentConsumptionExport: inputs.percentConsumptionExport,
+        exportPrice: inputs.exportPrice,
         lcoe: results.summary.lcoe.toFixed(2),
         irr: (results.summary.irr * 100).toFixed(2),
         paybackPeriod: results.summary.paybackPeriod.toFixed(1),
@@ -147,6 +153,9 @@ export default function Dashboard() {
         projectLife: inputs.projectLife,
         discountRate: inputs.discountRate.toString(),
         powerPrice: inputs.powerPrice,
+        percentConsumptionPPA: inputs.percentConsumptionPPA,
+        percentConsumptionExport: inputs.percentConsumptionExport,
+        exportPrice: inputs.exportPrice,
         lcoe: results.summary.lcoe.toFixed(2),
         irr: (results.summary.irr * 100).toFixed(2),
         paybackPeriod: results.summary.paybackPeriod.toFixed(1),
@@ -416,18 +425,54 @@ export default function Dashboard() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>% Consumption at PPA</Label>
+                      <span className="text-sm font-mono">{inputs.percentConsumptionPPA.toFixed(1)}%</span>
+                    </div>
+                    <Slider 
+                      value={[inputs.percentConsumptionPPA]} 
+                      min={0} max={100} step={1} 
+                      onValueChange={(v) => handleInputChange("percentConsumptionPPA", v[0])} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>% Consumption at Export</Label>
+                      <span className="text-sm font-mono">{inputs.percentConsumptionExport.toFixed(1)}%</span>
+                    </div>
+                    <Slider 
+                      value={[inputs.percentConsumptionExport]} 
+                      min={0} max={100} step={1} 
+                      onValueChange={(v) => handleInputChange("percentConsumptionExport", v[0])} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Export Price (£/MWh)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.exportPrice)}</span>
+                    </div>
+                    <Input 
+                      type="number" 
+                      value={inputs.exportPrice} 
+                      onChange={(e) => handleInputChange("exportPrice", Number(e.target.value))} 
+                    />
+                  </div>
+
                    <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Discount Rate</Label>
-                      <div className="relative">
-                        <Input 
-                          type="number" 
-                          step="0.01"
-                          value={inputs.discountRate} 
-                          onChange={(e) => handleInputChange("discountRate", Number(e.target.value))} 
-                        />
-                        <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
+                      <div className="flex justify-between">
+                        <Label>Discount Rate (%)</Label>
+                        <span className="text-sm font-mono">{(inputs.discountRate * 100).toFixed(2)}%</span>
                       </div>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        value={inputs.discountRate * 100} 
+                        onChange={(e) => handleInputChange("discountRate", Number(e.target.value) / 100)} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Degradation</Label>
