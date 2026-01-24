@@ -72,11 +72,45 @@ export const TERMINATION_COSTS = {
 } as const;
 
 // Land rights and planning costs (fixed, not voltage dependent)
+// Sources: ENA Wayleave Rates 2024-25, SSEN Land Rights Guidance
 export const LAND_RIGHTS_COSTS = {
   compensation: { min: 20000, max: 60000 },
   legal: { min: 50000, max: 90000 },
   planning: { min: 600, max: 1200 },
   surveys: { min: 15000, max: 40000 },
+} as const;
+
+// Wayleave rates per km based on land type
+// Source: ENA Wayleave Rates 2024-25 (https://www.energynetworks.org/assets/images/Publications/2024/240902-ena-wayleave-rates-2024-25.pdf)
+export const WAYLEAVE_RATES = {
+  agricultural: { min: 150, max: 300 }, // £ per km per year
+  grassland: { min: 100, max: 200 },
+  hedgerow: { min: 50, max: 150 },
+  arable: { min: 200, max: 400 },
+} as const;
+
+// HV Termination costs at end-user sites
+// Source: SSEN Charging Statements, typical HV connection costs
+export const HV_TERMINATION_COSTS = {
+  "6": { min: 15000, max: 35000 },
+  "11": { min: 20000, max: 50000 },
+  "33": { min: 35000, max: 80000 },
+  "66": { min: 60000, max: 120000 },
+  "132": { min: 100000, max: 200000 },
+} as const;
+
+// Step-down transformer installation costs (proportional to transformer size)
+// Source: Market norms for HV/LV substation installations
+export const STEPDOWN_INSTALLATION_COSTS = {
+  "6/0.4": { min: 50000, max: 100000 },
+  "11/0.4": { min: 60000, max: 120000 },
+  "33/0.4": { min: 80000, max: 150000 },
+  "33/6.6": { min: 70000, max: 130000 },
+  "33/11": { min: 75000, max: 140000 },
+  "66/11": { min: 100000, max: 180000 },
+  "66/33": { min: 90000, max: 160000 },
+  "132/33": { min: 120000, max: 220000 },
+  "132/66": { min: 110000, max: 200000 },
 } as const;
 
 /**
@@ -89,17 +123,31 @@ export function calculateGridConnectionCost(params: {
   stepUpTransformerCount: number; // Usually 1
   stepDownTransformerCount: number; // Number of end-user connection points
   roadCrossings: number;
+  includeStepDownInstallation?: boolean; // Add installation costs for step-down transformers
+  wayleaveYears?: number; // Number of years for wayleave calculation
 }): {
   cableCost: { min: number; max: number };
   stepUpCost: { min: number; max: number };
   stepDownCost: { min: number; max: number };
+  stepDownInstallationCost: { min: number; max: number };
   jointBayCost: { min: number; max: number };
   roadCrossingCost: { min: number; max: number };
   terminationCost: { min: number; max: number };
+  hvTerminationCost: { min: number; max: number };
+  wayleavesCost: { min: number; max: number };
   landRightsCost: { min: number; max: number };
   totalCost: { min: number; max: number };
 } {
-  const { distance, roadPercentage, cableVoltage, stepUpTransformerCount, stepDownTransformerCount, roadCrossings } = params;
+  const {
+    distance,
+    roadPercentage,
+    cableVoltage,
+    stepUpTransformerCount,
+    stepDownTransformerCount,
+    roadCrossings,
+    includeStepDownInstallation = false,
+    wayleaveYears = 1,
+  } = params;
 
   // Cable costs
   const cableCosts = CABLE_COSTS[cableVoltage as keyof typeof CABLE_COSTS] || CABLE_COSTS["33"];
@@ -149,6 +197,29 @@ export function calculateGridConnectionCost(params: {
     max: terminationCosts.max * (stepUpTransformerCount + stepDownTransformerCount),
   };
 
+  // Step-down transformer installation costs (if included)
+  const stepDownInstallationCosts = includeStepDownInstallation
+    ? STEPDOWN_INSTALLATION_COSTS[`${cableVoltage}/11` as keyof typeof STEPDOWN_INSTALLATION_COSTS] ||
+      STEPDOWN_INSTALLATION_COSTS["33/11"]
+    : { min: 0, max: 0 };
+  const stepDownInstallationCost = {
+    min: stepDownInstallationCosts.min * stepDownTransformerCount,
+    max: stepDownInstallationCosts.max * stepDownTransformerCount,
+  };
+
+  // HV termination costs at end-user sites
+  const hvTerminationCosts = HV_TERMINATION_COSTS[cableVoltage as keyof typeof HV_TERMINATION_COSTS] || HV_TERMINATION_COSTS["33"];
+  const hvTerminationCost = {
+    min: hvTerminationCosts.min * stepDownTransformerCount,
+    max: hvTerminationCosts.max * stepDownTransformerCount,
+  };
+
+  // Wayleaves costs (annual, multiplied by years)
+  const wayleavesCost = {
+    min: agriculturalDist * WAYLEAVE_RATES.agricultural.min * wayleaveYears,
+    max: agriculturalDist * WAYLEAVE_RATES.arable.max * wayleaveYears,
+  };
+
   // Land rights and planning costs
   const landRightsCost = {
     min: LAND_RIGHTS_COSTS.compensation.min + LAND_RIGHTS_COSTS.legal.min + LAND_RIGHTS_COSTS.planning.min + LAND_RIGHTS_COSTS.surveys.min,
@@ -157,17 +228,40 @@ export function calculateGridConnectionCost(params: {
 
   // Total cost
   const totalCost = {
-    min: cableCost.min + stepUpCost.min + stepDownCost.min + jointBayCost.min + roadCrossingCost.min + terminationCost.min + landRightsCost.min,
-    max: cableCost.max + stepUpCost.max + stepDownCost.max + jointBayCost.max + roadCrossingCost.max + terminationCost.max + landRightsCost.max,
+    min:
+      cableCost.min +
+      stepUpCost.min +
+      stepDownCost.min +
+      stepDownInstallationCost.min +
+      jointBayCost.min +
+      roadCrossingCost.min +
+      terminationCost.min +
+      hvTerminationCost.min +
+      wayleavesCost.min +
+      landRightsCost.min,
+    max:
+      cableCost.max +
+      stepUpCost.max +
+      stepDownCost.max +
+      stepDownInstallationCost.max +
+      jointBayCost.max +
+      roadCrossingCost.max +
+      terminationCost.max +
+      hvTerminationCost.max +
+      wayleavesCost.max +
+      landRightsCost.max,
   };
 
   return {
     cableCost,
     stepUpCost,
     stepDownCost,
+    stepDownInstallationCost,
     jointBayCost,
     roadCrossingCost,
     terminationCost,
+    hvTerminationCost,
+    wayleavesCost,
     landRightsCost,
     totalCost,
   };

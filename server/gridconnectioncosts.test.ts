@@ -108,9 +108,12 @@ describe("Grid Connection Cost Calculator", () => {
       result.cableCost.min +
       result.stepUpCost.min +
       result.stepDownCost.min +
+      result.stepDownInstallationCost.min +
       result.jointBayCost.min +
       result.roadCrossingCost.min +
       result.terminationCost.min +
+      result.hvTerminationCost.min +
+      result.wayleavesCost.min +
       result.landRightsCost.min;
 
     expect(result.totalCost.min).toBe(expectedMin);

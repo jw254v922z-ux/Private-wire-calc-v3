@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle, Info } from "lucide-react";
 import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
 import { calculateGridConnectionCost } from "@/lib/gridConnectionCosts";
 
@@ -19,18 +20,25 @@ export interface GridConnectionCosts {
   stepDownTransformerCount: number;
   roadPercentage: number;
   roadCrossings: number;
+  includeStepDownInstallation: boolean;
   cableCostMin: number;
   cableCostMax: number;
   stepUpCostMin: number;
   stepUpCostMax: number;
   stepDownCostMin: number;
   stepDownCostMax: number;
+  stepDownInstallationCostMin: number;
+  stepDownInstallationCostMax: number;
   jointBayCostMin: number;
   jointBayCostMax: number;
   roadCrossingCostMin: number;
   roadCrossingCostMax: number;
   terminationCostMin: number;
   terminationCostMax: number;
+  hvTerminationCostMin: number;
+  hvTerminationCostMax: number;
+  wayleavesCostMin: number;
+  wayleavesCostMax: number;
   landRightsCostMin: number;
   landRightsCostMax: number;
   totalCostMin: number;
@@ -48,6 +56,7 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
   const [stepDownTransformerCount, setStepDownTransformerCount] = useState(2);
   const [roadPercentage, setRoadPercentage] = useState(50);
   const [roadCrossings, setRoadCrossings] = useState(2);
+  const [includeStepDownInstallation, setIncludeStepDownInstallation] = useState(false);
 
   // Calculate costs based on current parameters
   const costs = calculateGridConnectionCost({
@@ -57,6 +66,8 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
     stepUpTransformerCount,
     stepDownTransformerCount,
     roadCrossings,
+    includeStepDownInstallation,
+    wayleaveYears: 1,
   });
 
   // Update parent component with new costs
@@ -69,34 +80,50 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
       stepDownTransformerCount,
       roadPercentage,
       roadCrossings,
+      includeStepDownInstallation,
       cableCostMin: costs.cableCost.min,
       cableCostMax: costs.cableCost.max,
       stepUpCostMin: costs.stepUpCost.min,
       stepUpCostMax: costs.stepUpCost.max,
       stepDownCostMin: costs.stepDownCost.min,
       stepDownCostMax: costs.stepDownCost.max,
+      stepDownInstallationCostMin: costs.stepDownInstallationCost.min,
+      stepDownInstallationCostMax: costs.stepDownInstallationCost.max,
       jointBayCostMin: costs.jointBayCost.min,
       jointBayCostMax: costs.jointBayCost.max,
       roadCrossingCostMin: costs.roadCrossingCost.min,
       roadCrossingCostMax: costs.roadCrossingCost.max,
       terminationCostMin: costs.terminationCost.min,
       terminationCostMax: costs.terminationCost.max,
+      hvTerminationCostMin: costs.hvTerminationCost.min,
+      hvTerminationCostMax: costs.hvTerminationCost.max,
+      wayleavesCostMin: costs.wayleavesCost.min,
+      wayleavesCostMax: costs.wayleavesCost.max,
       landRightsCostMin: costs.landRightsCost.min,
       landRightsCostMax: costs.landRightsCost.max,
       totalCostMin: costs.totalCost.min,
       totalCostMax: costs.totalCost.max,
     });
-  }, [distance, cableVoltage, stepDownVoltage, stepUpTransformerCount, stepDownTransformerCount, roadPercentage, roadCrossings]);
+  }, [distance, cableVoltage, stepDownVoltage, stepUpTransformerCount, stepDownTransformerCount, roadPercentage, roadCrossings, includeStepDownInstallation]);
 
-  const CostSummaryCard = ({ label, min, max }: { label: string; min: number; max: number }) => (
+  const CostSummaryCard = ({ label, min, max, source }: { label: string; min: number; max: number; source?: string }) => (
     <div className="p-3 bg-slate-50 rounded-lg border">
-      <p className="text-xs text-slate-600 font-medium">{label}</p>
-      <p className="text-sm font-semibold text-slate-900 mt-1">
-        {formatCurrency(min)} - {formatCurrency(max)}
-      </p>
-      <p className="text-xs text-slate-500 mt-1">
-        Average: {formatCurrency((min + max) / 2)}
-      </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-xs text-slate-600 font-medium">{label}</p>
+          <p className="text-sm font-semibold text-slate-900 mt-1">
+            {formatCurrency(min)} - {formatCurrency(max)}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Average: {formatCurrency((min + max) / 2)}
+          </p>
+        </div>
+        {source && (
+          <div className="ml-2 flex-shrink-0" title={source}>
+            <Info className="w-4 h-4 text-slate-400" />
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -104,7 +131,7 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Grid Connection Cost Calculator</CardTitle>
-        <CardDescription>Configure your private wire infrastructure parameters</CardDescription>
+        <CardDescription>Configure your private wire infrastructure parameters - costs auto-update in real-time</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="parameters" className="w-full">
@@ -196,6 +223,21 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
               <p className="text-xs text-slate-500">Number of connection points for end-users</p>
             </div>
 
+            {/* Step-Down Transformer Installation Checkbox */}
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-center gap-3">
+              <Checkbox
+                id="stepdown-installation"
+                checked={includeStepDownInstallation}
+                onCheckedChange={(checked) => setIncludeStepDownInstallation(checked as boolean)}
+              />
+              <Label htmlFor="stepdown-installation" className="cursor-pointer text-sm">
+                <span className="font-semibold">Include Step-Down Transformer Installation Costs</span>
+                <p className="text-xs text-slate-600 mt-1">
+                  Adds proportional costs for transformer sites, civil works, and connections
+                </p>
+              </Label>
+            </div>
+
             {/* Cable Distance */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
@@ -230,6 +272,9 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
                 <div>Agricultural: {((100 - roadPercentage) * distance / 100).toFixed(1)} km</div>
                 <div>Road: {(roadPercentage * distance / 100).toFixed(1)} km</div>
               </div>
+              <p className="text-xs text-slate-500 mt-2">
+                <span className="font-semibold">Wayleaves:</span> {formatCurrency((100 - roadPercentage) * distance / 100 * 150)} - {formatCurrency((100 - roadPercentage) * distance / 100 * 400)} per year
+              </p>
             </div>
 
             {/* Major Road Crossings */}
@@ -252,7 +297,7 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
               <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-blue-900">
-                Costs are calculated based on SSEN charging statements and UK industry benchmarks. Adjust parameters to see real-time cost estimates.
+                Costs are calculated based on SSEN charging statements (2024-25) and ENA wayleave rates. All costs are updated in real-time as you adjust parameters.
               </p>
             </div>
           </TabsContent>
@@ -264,16 +309,19 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
                 label="Cable (Trenching + Installation)"
                 min={costs.cableCost.min}
                 max={costs.cableCost.max}
+                source="SSEN Charging Statements 2024-25"
               />
               <CostSummaryCard
                 label="Joint Bays"
                 min={costs.jointBayCost.min}
                 max={costs.jointBayCost.max}
+                source="UK Civil Works Standards"
               />
               <CostSummaryCard
                 label="Road Crossings (Directional Drill)"
                 min={costs.roadCrossingCost.min}
                 max={costs.roadCrossingCost.max}
+                source="SSEN Charging Statements"
               />
             </div>
 
@@ -283,25 +331,49 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
                 label={`Step-Up Transformers (0.4 → ${cableVoltage} kV) x${stepUpTransformerCount}`}
                 min={costs.stepUpCost.min}
                 max={costs.stepUpCost.max}
+                source="Market Norms"
               />
               <CostSummaryCard
                 label={`Step-Down Transformers (${cableVoltage} → ${stepDownVoltage} kV) x${stepDownTransformerCount}`}
                 min={costs.stepDownCost.min}
                 max={costs.stepDownCost.max}
+                source="Market Norms"
               />
+              {includeStepDownInstallation && (
+                <CostSummaryCard
+                  label={`Step-Down Installation (Civil + Connections) x${stepDownTransformerCount}`}
+                  min={costs.stepDownInstallationCost.min}
+                  max={costs.stepDownInstallationCost.max}
+                  source="HV/LV Substation Standards"
+                />
+              )}
               <CostSummaryCard
-                label="Terminations & Connections"
+                label="Cable Terminations"
                 min={costs.terminationCost.min}
                 max={costs.terminationCost.max}
+                source="SSEN Charging Statements"
+              />
+              <CostSummaryCard
+                label={`HV Terminations at End-User Sites x${stepDownTransformerCount}`}
+                min={costs.hvTerminationCost.min}
+                max={costs.hvTerminationCost.max}
+                source="SSEN Charging Statements"
               />
             </div>
 
             <div className="space-y-3">
-              <h3 className="font-semibold text-slate-900">Soft Costs</h3>
+              <h3 className="font-semibold text-slate-900">Land & Regulatory</h3>
+              <CostSummaryCard
+                label="Annual Wayleaves (Agricultural Land)"
+                min={costs.wayleavesCost.min}
+                max={costs.wayleavesCost.max}
+                source="ENA Wayleave Rates 2024-25"
+              />
               <CostSummaryCard
                 label="Land Rights & Planning"
                 min={costs.landRightsCost.min}
                 max={costs.landRightsCost.max}
+                source="SSEN Land Rights Guidance"
               />
             </div>
 
@@ -312,6 +384,9 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
               </p>
               <p className="text-sm text-slate-400 mt-2">
                 Average: {formatCurrency((costs.totalCost.min + costs.totalCost.max) / 2)}
+              </p>
+              <p className="text-xs text-slate-500 mt-3 border-t border-slate-700 pt-2">
+                <span className="font-semibold">Note:</span> Wayleaves are annual costs. Total shown includes one year of wayleave payments.
               </p>
             </div>
           </TabsContent>
