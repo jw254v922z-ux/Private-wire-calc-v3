@@ -3,7 +3,34 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getSolarModelsByUserId, getSolarModelById, createSolarModel, updateSolarModel, deleteSolarModel } from "./db";
+import { getSolarModelsByUserId, getSolarModelById, createSolarModel, updateSolarModel, deleteSolarModel, getGridConnectionCost, createGridConnectionCost, updateGridConnectionCost, deleteGridConnectionCost } from "./db";
+
+const gridConnectionSchema = z.object({
+  agriculturalTrenchingMin: z.number().nonnegative().optional(),
+  agriculturalTrenchingMax: z.number().nonnegative().optional(),
+  roadTrenchingMin: z.number().nonnegative().optional(),
+  roadTrenchingMax: z.number().nonnegative().optional(),
+  majorRoadCrossingsMin: z.number().nonnegative().optional(),
+  majorRoadCrossingsMax: z.number().nonnegative().optional(),
+  jointBaysMin: z.number().nonnegative().optional(),
+  jointBaysMax: z.number().nonnegative().optional(),
+  transformersMin: z.number().nonnegative().optional(),
+  transformersMax: z.number().nonnegative().optional(),
+  landRightsCompensationMin: z.number().nonnegative().optional(),
+  landRightsCompensationMax: z.number().nonnegative().optional(),
+  landRightsLegalMin: z.number().nonnegative().optional(),
+  landRightsLegalMax: z.number().nonnegative().optional(),
+  planningFeesMin: z.number().nonnegative().optional(),
+  planningFeesMax: z.number().nonnegative().optional(),
+  planningConsentsMin: z.number().nonnegative().optional(),
+  planningConsentsMax: z.number().nonnegative().optional(),
+  constructionMin: z.number().nonnegative().optional(),
+  constructionMax: z.number().nonnegative().optional(),
+  softCostsMin: z.number().nonnegative().optional(),
+  softCostsMax: z.number().nonnegative().optional(),
+  projectMin: z.number().nonnegative().optional(),
+  projectMax: z.number().nonnegative().optional(),
+});
 
 export const appRouter = router({
   system: systemRouter,
@@ -84,6 +111,34 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) =>
         deleteSolarModel(input.id, ctx.user.id)
+      ),
+  }),
+
+  gridConnection: router({
+    get: protectedProcedure
+      .input(z.object({ solarModelId: z.number() }))
+      .query(({ input }) =>
+        getGridConnectionCost(input.solarModelId)
+      ),
+    create: protectedProcedure
+      .input(z.object({
+        solarModelId: z.number(),
+      }).merge(gridConnectionSchema))
+      .mutation(({ input }) =>
+        createGridConnectionCost(input)
+      ),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }).merge(gridConnectionSchema))
+      .mutation(({ input }) => {
+        const { id, ...data } = input;
+        return updateGridConnectionCost(id, data);
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) =>
+        deleteGridConnectionCost(input.id)
       ),
   }),
 });

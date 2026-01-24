@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, solarModels, InsertSolarModel } from "../drizzle/schema";
+import { InsertUser, users, solarModels, InsertSolarModel, gridConnectionCosts, InsertGridConnectionCost } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -122,4 +122,33 @@ export async function deleteSolarModel(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(solarModels).where(eq(solarModels.id, id) && eq(solarModels.userId, userId));
+}
+
+export async function getGridConnectionCost(solarModelId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(gridConnectionCosts)
+    .where(eq(gridConnectionCosts.solarModelId, solarModelId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createGridConnectionCost(data: InsertGridConnectionCost) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(gridConnectionCosts).values(data);
+}
+
+export async function updateGridConnectionCost(id: number, data: Partial<InsertGridConnectionCost>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(gridConnectionCosts).set(data).where(eq(gridConnectionCosts.id, id));
+}
+
+export async function deleteGridConnectionCost(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(gridConnectionCosts).where(eq(gridConnectionCosts.id, id));
 }

@@ -15,6 +15,13 @@
       "when": 1769276419727,
       "tag": "0001_premium_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1769279021457,
+      "tag": "0002_reflective_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }
