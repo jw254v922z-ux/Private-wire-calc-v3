@@ -347,7 +347,10 @@ export default function Dashboard() {
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Costs (Capex)</h3>
                   
                   <div className="space-y-2">
-                    <Label>EPC Cost per MW (£)</Label>
+                    <div className="flex justify-between">
+                      <Label>EPC Cost per MW (£)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.capexPerMW)}</span>
+                    </div>
                     <Input 
                       type="number" 
                       value={inputs.capexPerMW} 
@@ -358,12 +361,14 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <Label>Private Wire Cost (£)</Label>
-                      {gridConnectionCosts && (
-                        <span className="text-xs text-slate-500">
-                          Grid: {formatCurrency((gridConnectionCosts.totalCostMin + gridConnectionCosts.totalCostMax) / 2)}
-                        </span>
-                      )}
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.privateWireCost)}</span>
                     </div>
+                    {gridConnectionCosts && (
+                      <div className="text-xs text-slate-500 bg-blue-50 p-2 rounded">
+                        <div className="font-semibold">Grid Connection Estimate:</div>
+                        <div>{formatCurrency((gridConnectionCosts.totalCostMin + gridConnectionCosts.totalCostMax) / 2)}</div>
+                      </div>
+                    )}
                     <Input 
                       type="number" 
                       value={inputs.privateWireCost} 
@@ -372,7 +377,10 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Dev Premium per MW (£)</Label>
+                    <div className="flex justify-between">
+                      <Label>Dev Premium per MW (£)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.developmentPremiumPerMW)}</span>
+                    </div>
                     <Input 
                       type="number" 
                       value={inputs.developmentPremiumPerMW} 
@@ -385,7 +393,10 @@ export default function Dashboard() {
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Operational</h3>
                   
                   <div className="space-y-2">
-                    <Label>Opex per MW (£/year)</Label>
+                    <div className="flex justify-between">
+                      <Label>Opex per MW (£/year)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.opexPerMW)}</span>
+                    </div>
                     <Input 
                       type="number" 
                       value={inputs.opexPerMW} 
@@ -394,7 +405,10 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Power Price (£/MWh)</Label>
+                    <div className="flex justify-between">
+                      <Label>Power Price (£/MWh)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.powerPrice)}</span>
+                    </div>
                     <Input 
                       type="number" 
                       value={inputs.powerPrice} 
@@ -566,6 +580,8 @@ export default function Dashboard() {
                     setGridConnectionCosts(costs);
                     const avgCost = (costs.totalCostMin + costs.totalCostMax) / 2;
                     handleInputChange("gridConnectionCost", Math.round(avgCost));
+                    // Also update Private Wire Cost with grid connection estimate
+                    handleInputChange("privateWireCost", Math.round(avgCost));
                   }}
                 />
               </TabsContent>
