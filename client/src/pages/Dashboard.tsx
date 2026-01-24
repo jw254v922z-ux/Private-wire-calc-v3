@@ -561,9 +561,9 @@ export default function Dashboard() {
                     <CardTitle>Annual Cash Flow</CardTitle>
                     <CardDescription>Undiscounted annual cash flows over project life</CardDescription>
                   </CardHeader>
-                  <CardContent className="h-[400px]">
+                  <CardContent className="h-[500px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={results.yearlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <BarChart data={results.yearlyData} margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="year" />
                         <YAxis tickFormatter={(val) => `£${val/1000000}m`} />
@@ -644,45 +644,8 @@ export default function Dashboard() {
               </TabsContent>
             </Tabs>
 
-            {/* Detailed Table Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Yearly Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-muted-foreground uppercase bg-slate-50/50 border-b">
-                      <tr>
-                        <th className="px-4 py-3">Year</th>
-                        <th className="px-4 py-3">Generation (MWh)</th>
-                        <th className="px-4 py-3">Revenue</th>
-                        <th className="px-4 py-3">Opex</th>
-                        <th className="px-4 py-3">Cash Flow</th>
-                        <th className="px-4 py-3">Discounted CF</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {results.yearlyData.slice(0, 11).map((row) => (
-                        <tr key={row.year} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-4 py-3 font-medium">{row.year}</td>
-                          <td className="px-4 py-3">{formatNumber(row.generation, 0)}</td>
-                          <td className="px-4 py-3">{formatCurrency(row.revenue)}</td>
-                          <td className="px-4 py-3">{formatCurrency(row.opex)}</td>
-                          <td className={cn("px-4 py-3 font-medium", row.cashFlow >= 0 ? "text-emerald-600" : "text-red-600")}>
-                            {formatCurrency(row.cashFlow)}
-                          </td>
-                          <td className="px-4 py-3 text-muted-foreground">{formatCurrency(row.discountedCashFlow)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="px-4 py-3 text-center text-xs text-muted-foreground border-t bg-slate-50/30">
-                    Showing first 10 years. Export to CSV for full details.
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Detailed Table Preview - Only show on non-gridcosts tabs */}
+            {/* Hidden from Private Wire Parameters tab */}
 
           </div>
         </div>
