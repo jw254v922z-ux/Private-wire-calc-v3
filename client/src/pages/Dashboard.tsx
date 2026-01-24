@@ -11,6 +11,8 @@ import { BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } 
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MetricCard } from "../components/MetricCard";
+import { GridConnectionCostBreakdown } from "../components/GridConnectionCostBreakdown";
+import { GridConnectionSliders, type GridConnectionCosts } from "../components/GridConnectionSliders";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -24,6 +26,7 @@ export default function Dashboard() {
   const [modelDescription, setModelDescription] = useState("");
   const [currentModelId, setCurrentModelId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [gridConnectionCosts, setGridConnectionCosts] = useState<GridConnectionCosts | null>(null);
 
   const { data: savedModels = [], refetch: refetchModels } = trpc.solar.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -466,10 +469,11 @@ export default function Dashboard() {
           <div className="lg:col-span-8 space-y-6">
             
             <Tabs defaultValue="cashflow" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsList className="grid w-full grid-cols-4 mb-4">
                 <TabsTrigger value="cashflow">Cash Flow Analysis</TabsTrigger>
                 <TabsTrigger value="cumulative">Cumulative Returns</TabsTrigger>
                 <TabsTrigger value="generation">Generation & Revenue</TabsTrigger>
+                <TabsTrigger value="gridcosts">Grid Connection</TabsTrigger>
               </TabsList>
               
               <TabsContent value="cashflow">
@@ -546,6 +550,16 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
+              </TabsContent>
+              
+              <TabsContent value="gridcosts">
+                <GridConnectionSliders
+                  onCostsUpdate={(costs) => {
+                    setGridConnectionCosts(costs);
+                    const avgCost = (costs.projectMin + costs.projectMax) / 2;
+                    handleInputChange("gridConnectionCost", Math.round(avgCost));
+                  }}
+                />
               </TabsContent>
             </Tabs>
 
