@@ -4,16 +4,92 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { calculateSolarModel, defaultInputs, SolarInputs, SolarResults } from "@/lib/calculator";
 import { cn } from "@/lib/utils";
-import { BatteryCharging, Coins, Download, Factory, Zap } from "lucide-react";
+import { BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MetricCard } from "../components/MetricCard";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
+import { toast } from "sonner";
 
 export default function Dashboard() {
+  const { user, logout, isAuthenticated } = useAuth();
   const [inputs, setInputs] = useState<SolarInputs>(defaultInputs);
   const [results, setResults] = useState<SolarResults>(calculateSolarModel(defaultInputs));
+  const [modelName, setModelName] = useState("My Solar Model");
+  const [modelDescription, setModelDescription] = useState("");
+  const [currentModelId, setCurrentModelId] = useState<number | null>(null);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+
+  const { data: savedModels = [], refetch: refetchModels } = trpc.solar.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const createModelMutation = trpc.solar.create.useMutation({
+    onSuccess: () => {
+      toast.success("Model saved successfully!");
+      refetchModels();
+      setShowSaveDialog(false);
+      setModelName("My Solar Model");
+      setModelDescription("");
+    },
+    onError: (error) => {
+      toast.error("Failed to save model: " + error.message);
+    },
+  });
+
+  const updateModelMutation = trpc.solar.update.useMutation({
+    onSuccess: () => {
+      toast.success("Model updated successfully!");
+      refetchModels();
+      setShowSaveDialog(false);
+    },
+    onError: (error) => {
+      toast.error("Failed to update model: " + error.message);
+    },
+  });
+
+  const deleteModelMutation = trpc.solar.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Model deleted successfully!");
+      refetchModels();
+      if (currentModelId) setCurrentModelId(null);
+    },
+    onError: (error) => {
+      toast.error("Failed to delete model: " + error.message);
+    },
+  });
+
+  const loadModel = trpc.solar.get.useQuery(
+    { id: currentModelId! },
+    { enabled: currentModelId !== null && isAuthenticated }
+  );
+
+  useEffect(() => {
+    if (loadModel.data) {
+      const model = loadModel.data;
+      setInputs({
+        mw: model.mw,
+        capexPerMW: model.capexPerMW,
+        privateWireCost: model.privateWireCost,
+        gridConnectionCost: model.gridConnectionCost,
+        developmentPremiumPerMW: model.developmentPremiumPerMW,
+        opexPerMW: model.opexPerMW,
+        opexEscalation: parseFloat(model.opexEscalation),
+        generationPerMW: parseFloat(model.generationPerMW),
+        degradationRate: parseFloat(model.degradationRate),
+        projectLife: model.projectLife,
+        discountRate: parseFloat(model.discountRate),
+        powerPrice: model.powerPrice,
+      });
+      setModelName(model.name);
+      setModelDescription(model.description || "");
+    }
+  }, [loadModel.data]);
 
   useEffect(() => {
     setResults(calculateSolarModel(inputs));
@@ -21,6 +97,64 @@ export default function Dashboard() {
 
   const handleInputChange = (key: keyof SolarInputs, value: number) => {
     setInputs(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveModel = () => {
+    if (!isAuthenticated) {
+      window.location.href = getLoginUrl();
+      return;
+    }
+
+    if (currentModelId) {
+      updateModelMutation.mutate({
+        id: currentModelId,
+        name: modelName,
+        description: modelDescription,
+        mw: inputs.mw,
+        capexPerMW: inputs.capexPerMW,
+        privateWireCost: inputs.privateWireCost,
+        gridConnectionCost: inputs.gridConnectionCost,
+        developmentPremiumPerMW: inputs.developmentPremiumPerMW,
+        opexPerMW: inputs.opexPerMW,
+        opexEscalation: inputs.opexEscalation.toString(),
+        generationPerMW: inputs.generationPerMW.toString(),
+        degradationRate: inputs.degradationRate.toString(),
+        projectLife: inputs.projectLife,
+        discountRate: inputs.discountRate.toString(),
+        powerPrice: inputs.powerPrice,
+        lcoe: results.summary.lcoe.toFixed(2),
+        irr: (results.summary.irr * 100).toFixed(2),
+        paybackPeriod: results.summary.paybackPeriod.toFixed(1),
+        totalNpv: results.summary.totalDiscountedCashFlow.toFixed(0),
+      });
+    } else {
+      createModelMutation.mutate({
+        name: modelName,
+        description: modelDescription,
+        mw: inputs.mw,
+        capexPerMW: inputs.capexPerMW,
+        privateWireCost: inputs.privateWireCost,
+        gridConnectionCost: inputs.gridConnectionCost,
+        developmentPremiumPerMW: inputs.developmentPremiumPerMW,
+        opexPerMW: inputs.opexPerMW,
+        opexEscalation: inputs.opexEscalation.toString(),
+        generationPerMW: inputs.generationPerMW.toString(),
+        degradationRate: inputs.degradationRate.toString(),
+        projectLife: inputs.projectLife,
+        discountRate: inputs.discountRate.toString(),
+        powerPrice: inputs.powerPrice,
+        lcoe: results.summary.lcoe.toFixed(2),
+        irr: (results.summary.irr * 100).toFixed(2),
+        paybackPeriod: results.summary.paybackPeriod.toFixed(1),
+        totalNpv: results.summary.totalDiscountedCashFlow.toFixed(0),
+      });
+    }
+  };
+
+  const handleDeleteModel = (id: number) => {
+    if (confirm("Are you sure you want to delete this model?")) {
+      deleteModelMutation.mutate({ id });
+    }
   };
 
   const formatCurrency = (val: number) => {
@@ -59,6 +193,28 @@ export default function Dashboard() {
     document.body.removeChild(link);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Welcome to Private Wire Solar Calculator</CardTitle>
+            <CardDescription>Sign in to save and manage your solar project models</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => window.location.href = getLoginUrl()} 
+              className="w-full"
+              size="lg"
+            >
+              Sign In with Manus
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-12">
       {/* Hero Header */}
@@ -75,12 +231,17 @@ export default function Dashboard() {
                 Private Wire Solar Calculator
               </h1>
               <p className="text-slate-300 max-w-2xl text-lg">
-                Advanced financial modeling for solar assets with private wire integration.
+                Welcome, {user?.name || "User"}! Advanced financial modeling for solar assets with private wire integration.
               </p>
             </div>
-            <Button onClick={exportCSV} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-              <Download className="mr-2 h-4 w-4" /> Export Model
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={exportCSV} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+                <Download className="mr-2 h-4 w-4" /> Export
+              </Button>
+              <Button onClick={() => logout()} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+                <LogOut className="mr-2 h-4 w-4" /> Sign Out
+              </Button>
+            </div>
           </div>
 
           {/* Key Metrics Row */}
@@ -116,8 +277,46 @@ export default function Dashboard() {
       <div className="container -mt-16 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Sidebar Inputs */}
+          {/* Sidebar with Model Management */}
           <div className="lg:col-span-4 space-y-6">
+            {/* Model Management Card */}
+            <Card className="shadow-lg border-t-4 border-t-primary">
+              <CardHeader>
+                <CardTitle>Saved Models</CardTitle>
+                <CardDescription>Load or manage your project models</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {savedModels.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No saved models yet. Create one to get started!</p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {savedModels.map((model) => (
+                      <div key={model.id} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 rounded">
+                        <button
+                          onClick={() => setCurrentModelId(model.id)}
+                          className={cn(
+                            "flex-1 text-left text-sm font-medium truncate",
+                            currentModelId === model.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          {model.name}
+                        </button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteModel(model.id)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Parameters Card */}
             <Card className="shadow-lg border-t-4 border-t-primary">
               <CardHeader>
                 <CardTitle>Project Parameters</CardTitle>
@@ -220,6 +419,45 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full" size="lg">
+                      <Save className="mr-2 h-4 w-4" /> {currentModelId ? "Update" : "Save"} Model
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{currentModelId ? "Update" : "Save"} Model</DialogTitle>
+                      <DialogDescription>Give your model a name and description</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Model Name</Label>
+                        <Input 
+                          value={modelName} 
+                          onChange={(e) => setModelName(e.target.value)} 
+                          placeholder="e.g., 28MW Solar Farm - High Price Scenario"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Description (Optional)</Label>
+                        <Input 
+                          value={modelDescription} 
+                          onChange={(e) => setModelDescription(e.target.value)} 
+                          placeholder="Add notes about this model..."
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleSaveModel} 
+                        className="w-full"
+                        disabled={createModelMutation.isPending || updateModelMutation.isPending}
+                      >
+                        {createModelMutation.isPending || updateModelMutation.isPending ? "Saving..." : "Save Model"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
               </CardContent>
             </Card>
           </div>
@@ -280,7 +518,6 @@ export default function Dashboard() {
                         <Tooltip formatter={(val: number) => formatCurrency(val)} />
                         <Legend />
                         <Area type="monotone" dataKey="cumulativeDiscountedCashFlow" name="Cumulative Discounted CF" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCumulative)" />
-                        {/* Zero line */}
                         <Line type="monotone" dataKey={() => 0} stroke="#64748b" strokeDasharray="5 5" strokeWidth={1} dot={false} activeDot={false} legendType="none" />
                       </AreaChart>
                     </ResponsiveContainer>
