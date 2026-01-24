@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { calculateSolarModel, defaultInputs, SolarInputs, SolarResults } from "@/lib/calculator";
 import { cn } from "@/lib/utils";
+import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
 import { BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -332,7 +333,7 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <Label>Capacity (MW)</Label>
-                      <span className="text-sm font-mono">{inputs.mw} MW</span>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.mw)} MW</span>
                     </div>
                     <Slider 
                       value={[inputs.mw]} 

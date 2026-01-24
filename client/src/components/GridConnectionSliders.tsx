@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
+import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
 
 interface GridConnectionSliderProps {
   onCostsUpdate: (costs: GridConnectionCosts) => void;
@@ -13,6 +14,7 @@ export interface GridConnectionCosts {
   distance: number;
   transformerCount: number;
   voltage: string;
+  cableVoltage: string;
   joints: number;
   agriculturalTrenchingMin: number;
   agriculturalTrenchingMax: number;
@@ -57,6 +59,7 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
   const [distance, setDistance] = useState(3);
   const [transformerCount, setTransformerCount] = useState(2);
   const [voltage, setVoltage] = useState("33/11");
+  const [cableVoltage, setCableVoltage] = useState("33");
   const [roadPercentage, setRoadPercentage] = useState(50);
   const [majorRoadCrossings, setMajorRoadCrossings] = useState(2);
 
@@ -109,6 +112,7 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
       distance,
       transformerCount,
       voltage,
+      cableVoltage,
       joints,
       agriculturalTrenchingMin,
       agriculturalTrenchingMax,
@@ -135,15 +139,9 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
       projectMin,
       projectMax,
     });
-  }, [distance, transformerCount, voltage, roadPercentage, majorRoadCrossings]);
+  }, [distance, transformerCount, voltage, cableVoltage, roadPercentage, majorRoadCrossings]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: "GBP",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
+
 
   const CostSummaryCard = ({ label, min, max }: { label: string; min: number; max: number }) => (
     <div className="p-3 bg-slate-50 rounded-lg border">
@@ -265,6 +263,25 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
               <p className="text-xs text-slate-500 mt-2">
                 Selected: <span className="font-semibold">{voltage} kV</span>
               </p>
+            </div>
+
+            {/* Cable Voltage */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label className="text-base font-semibold">Cable Voltage (kV)</Label>
+                <span className="text-2xl font-bold text-indigo-600">{cableVoltage} kV</span>
+              </div>
+              <Slider
+                value={[parseInt(cableVoltage)]}
+                min={6}
+                max={132}
+                step={1}
+                onValueChange={(v) => setCableVoltage(v[0].toString())}
+                className="w-full"
+              />
+              <div className="text-xs text-slate-500 mt-2">
+                <p>Common voltages: 6, 11, 33, 66, 132 kV</p>
+              </div>
             </div>
 
             {/* Info Box */}
