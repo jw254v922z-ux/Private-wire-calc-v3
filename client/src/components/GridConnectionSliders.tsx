@@ -21,6 +21,8 @@ export interface GridConnectionCosts {
   roadPercentage: number;
   roadCrossings: number;
   includeStepDownInstallation: boolean;
+  wayleaveDiscount: number; // 0-100%
+  roadCableLayingCostPerKm: number; // £/km for road cable laying
   cableCostMin: number;
   cableCostMax: number;
   stepUpCostMin: number;

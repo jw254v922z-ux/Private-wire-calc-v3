@@ -3,10 +3,10 @@
 ## Critical Fixes & Enhancements
 
 ### Phase 1: Wayleave & Land Costs
-- [ ] Show wayleave cost units (£/km/year) in grid connection tab
-- [ ] Add wayleave discount percentage option
-- [ ] Add wayleave CPI inflation option
-- [ ] Add road cable laying costs (similar to wayleave structure)
+- [x] Show wayleave cost units (£/km/year) in grid connection tab
+- [x] Add wayleave discount percentage option
+- [x] Add wayleave CPI inflation option
+- [x] Add road cable laying costs (similar to wayleave structure)
 
 ### Phase 2: CAPEX/OPEX Calculations
 - [ ] Fix CAPEX to include: Dev Premium + EPC Cost + Private Wire Cost

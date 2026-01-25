@@ -125,6 +125,8 @@ export function calculateGridConnectionCost(params: {
   roadCrossings: number;
   includeStepDownInstallation?: boolean; // Add installation costs for step-down transformers
   wayleaveYears?: number; // Number of years for wayleave calculation
+  wayleaveDiscount?: number; // 0-100% discount on wayleaves
+  roadCableLayingCostPerKm?: number; // £/km for road cable laying
 }): {
   cableCost: { min: number; max: number };
   stepUpCost: { min: number; max: number };
@@ -136,6 +138,7 @@ export function calculateGridConnectionCost(params: {
   hvTerminationCost: { min: number; max: number };
   wayleavesCost: { min: number; max: number };
   landRightsCost: { min: number; max: number };
+  roadCableLayingCost: { min: number; max: number };
   totalCost: { min: number; max: number };
 } {
   const {
@@ -147,6 +150,8 @@ export function calculateGridConnectionCost(params: {
     roadCrossings,
     includeStepDownInstallation = false,
     wayleaveYears = 1,
+    wayleaveDiscount = 0,
+    roadCableLayingCostPerKm = 150000, // Default £150k/km for road cable laying
   } = params;
 
   // Cable costs
@@ -214,10 +219,17 @@ export function calculateGridConnectionCost(params: {
     max: hvTerminationCosts.max * stepDownTransformerCount,
   };
 
-  // Wayleaves costs (annual, multiplied by years)
+  // Wayleaves costs (annual, multiplied by years, with discount applied)
+  const wayleaveDiscountFactor = 1 - (wayleaveDiscount / 100);
   const wayleavesCost = {
-    min: agriculturalDist * WAYLEAVE_RATES.agricultural.min * wayleaveYears,
-    max: roadDist * WAYLEAVE_RATES.arable.max * wayleaveYears,
+    min: agriculturalDist * WAYLEAVE_RATES.agricultural.min * wayleaveYears * wayleaveDiscountFactor,
+    max: roadDist * WAYLEAVE_RATES.arable.max * wayleaveYears * wayleaveDiscountFactor,
+  };
+
+  // Road cable laying costs (one-time, applied to road portion)
+  const roadCableLayingCost = {
+    min: roadDist * roadCableLayingCostPerKm,
+    max: roadDist * roadCableLayingCostPerKm,
   };
 
   // Land rights and planning costs
@@ -238,7 +250,8 @@ export function calculateGridConnectionCost(params: {
       terminationCost.min +
       hvTerminationCost.min +
       wayleavesCost.min +
-      landRightsCost.min,
+      landRightsCost.min +
+      roadCableLayingCost.min,
     max:
       cableCost.max +
       stepUpCost.max +
@@ -249,7 +262,8 @@ export function calculateGridConnectionCost(params: {
       terminationCost.max +
       hvTerminationCost.max +
       wayleavesCost.max +
-      landRightsCost.max,
+      landRightsCost.max +
+      roadCableLayingCost.max,
   };
 
   return {
@@ -263,6 +277,7 @@ export function calculateGridConnectionCost(params: {
     hvTerminationCost,
     wayleavesCost,
     landRightsCost,
+    roadCableLayingCost,
     totalCost,
   };
 }

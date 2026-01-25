@@ -114,7 +114,8 @@ describe("Grid Connection Cost Calculator", () => {
       result.terminationCost.min +
       result.hvTerminationCost.min +
       result.wayleavesCost.min +
-      result.landRightsCost.min;
+      result.landRightsCost.min +
+      result.roadCableLayingCost.min;
 
     expect(result.totalCost.min).toBe(expectedMin);
   });
