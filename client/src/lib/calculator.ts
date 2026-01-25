@@ -85,7 +85,7 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   // Based on Excel: Capex (Year 0) = EPC Cost + Private Wire + Developer Premium
   // Note: The Excel had "Aurora including grid + £300/m" but modeled as a single lump sum.
   // We will construct the total Capex from components to allow flexibility.
-  const totalCapex = (inputs.capexPerMW * inputs.mw) + inputs.privateWireCost + inputs.gridConnectionCost + developerPremium;
+  const totalCapex = (inputs.capexPerMW * inputs.mw) + inputs.privateWireCost + developerPremium;
   
   const annualOpexYear1 = inputs.opexPerMW * inputs.mw; // The Excel used a fixed 15.1 * MW * 1000 formula, we generalize it
   const annualGenYear1 = inputs.generationPerMW * inputs.mw;
