@@ -9,9 +9,9 @@
 - [x] Add road cable laying costs (similar to wayleave structure)
 
 ### Phase 2: CAPEX/OPEX Calculations
-- [ ] Fix CAPEX to include: Dev Premium + EPC Cost + Private Wire Cost
-- [ ] Fix OPEX to deduct from cash flow each year (not just year 1)
-- [ ] Verify financial model calculations against Excel
+- [x] Fix CAPEX to include: Dev Premium + EPC Cost + Private Wire Cost (already correct)
+- [x] Fix OPEX to deduct from cash flow each year (already correct)
+- [x] Verify financial model calculations against Excel (LCOE now matches exactly)
 
 ### Phase 3: Dev Premium vs Land Option
 - [ ] Add toggle between "Developer Premium" and "Land Option Yearly Cost"

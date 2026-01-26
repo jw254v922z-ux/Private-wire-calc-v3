@@ -149,7 +149,9 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   }
 
   // Summary Calculations
-  const totalDiscountedCost = yearlyData.reduce((sum, y) => sum + y.discountedCost, 0) + yearlyData[0].discountedCost; // Add Year 0 Capex (which is discounted cost)
+  // LCOE = Total Discounted Cost / Total Discounted Energy
+  // Note: Year 0 CAPEX is already included in yearlyData[0].discountedCost, so we just sum all years
+  const totalDiscountedCost = yearlyData.reduce((sum, y) => sum + y.discountedCost, 0);
   const totalDiscountedEnergy = yearlyData.reduce((sum, y) => sum + y.discountedEnergy, 0);
   const lcoe = totalDiscountedCost / totalDiscountedEnergy;
 
