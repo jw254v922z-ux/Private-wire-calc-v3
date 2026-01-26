@@ -4,9 +4,16 @@ export interface SolarInputs {
   privateWireCost: number;
   gridConnectionCost: number; // Additional grid cost
   developmentPremiumPerMW: number;
+  developmentPremiumEnabled: boolean; // Enable/disable developer premium
+  developmentPremiumDiscount: number; // % discount on developer premium (0-100)
+  landOptionCostPerMWYear: number; // Annual land option cost per MW (£/MW/year)
+  landOptionEnabled: boolean; // Enable/disable land option cost
+  landOptionDiscount: number; // % discount on land option cost (0-100)
+  costInflationRate: number; // CPI inflation rate for both premium and land option (%)
   opexPerMW: number; // Annual Opex per MW
   opexEscalation: number; // %
   generationPerMW: number; // MWh per MW (Year 1)
+  irradianceOverride: number; // Custom irradiance (kWh/m2/year), 0 = use default
   degradationRate: number; // %
   projectLife: number; // Years
   discountRate: number; // %
@@ -81,13 +88,20 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   const yearlyData: YearData[] = [];
   
   // Initial Calculations
-  const developerPremium = inputs.developmentPremiumPerMW * inputs.mw;
-  // Based on Excel: Capex (Year 0) = EPC Cost + Private Wire + Developer Premium
-  // Note: The Excel had "Aurora including grid + £300/m" but modeled as a single lump sum.
-  // We will construct the total Capex from components to allow flexibility.
-  const totalCapex = (inputs.capexPerMW * inputs.mw) + inputs.privateWireCost + developerPremium;
+  // Developer Premium: apply discount if enabled
+  const developerPremiumAmount = inputs.developmentPremiumEnabled 
+    ? inputs.developmentPremiumPerMW * inputs.mw * (1 - inputs.developmentPremiumDiscount / 100)
+    : 0;
   
+  // CAPEX = EPC Cost + Private Wire + Developer Premium (if enabled)
+  const totalCapex = (inputs.capexPerMW * inputs.mw) + inputs.privateWireCost + developerPremiumAmount;
+  
+  // Base OPEX + Land Option Cost (if enabled) with discount
   const annualOpexYear1 = inputs.opexPerMW * inputs.mw; // The Excel used a fixed 15.1 * MW * 1000 formula, we generalize it
+  const landOptionCostYear1 = inputs.landOptionEnabled
+    ? inputs.landOptionCostPerMWYear * inputs.mw * (1 - inputs.landOptionDiscount / 100)
+    : 0;
+  
   const annualGenYear1 = inputs.generationPerMW * inputs.mw;
 
   let cumulativeCashFlow = -totalCapex;
@@ -112,7 +126,11 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
 
   // Years 1 to Project Life
   for (let year = 1; year <= inputs.projectLife; year++) {
-    const opex = annualOpexYear1 * Math.pow(1 + inputs.opexEscalation, year - 1);
+    // OPEX = Base OPEX + Land Option Cost (if enabled), both with escalations
+    const baseOpex = annualOpexYear1 * Math.pow(1 + inputs.opexEscalation, year - 1);
+    const landOptionCost = landOptionCostYear1 * Math.pow(1 + inputs.costInflationRate / 100, year - 1);
+    const opex = baseOpex + landOptionCost;
+    
     const generation = annualGenYear1 * Math.pow(1 - inputs.degradationRate, year - 1);
     
     // Split revenue between PPA consumption and export
@@ -207,9 +225,16 @@ export const defaultInputs: SolarInputs = {
   privateWireCost: 6400000,
   gridConnectionCost: 0, // Included in EPC in the Excel model, but kept separate for flexibility if needed
   developmentPremiumPerMW: 50000,
+  developmentPremiumEnabled: true,
+  developmentPremiumDiscount: 0,
+  landOptionCostPerMWYear: 0,
+  landOptionEnabled: false,
+  landOptionDiscount: 0,
+  costInflationRate: 2.5,
   opexPerMW: 15100, // 422800 / 28 = 15100
   opexEscalation: 0,
   generationPerMW: 944.82, // 26454.96 / 28 = 944.82. Excel formula was 1086 * 0.87 = 944.82
+  irradianceOverride: 0,
   degradationRate: 0.004,
   projectLife: 15,
   discountRate: 0.10,

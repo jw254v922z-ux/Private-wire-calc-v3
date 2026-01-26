@@ -82,9 +82,16 @@ export default function Dashboard() {
         privateWireCost: model.privateWireCost,
         gridConnectionCost: model.gridConnectionCost,
         developmentPremiumPerMW: model.developmentPremiumPerMW,
+        developmentPremiumEnabled: true,
+        developmentPremiumDiscount: 0,
+        landOptionCostPerMWYear: 0,
+        landOptionEnabled: false,
+        landOptionDiscount: 0,
+        costInflationRate: 2.5,
         opexPerMW: model.opexPerMW,
         opexEscalation: parseFloat(model.opexEscalation),
         generationPerMW: parseFloat(model.generationPerMW),
+        irradianceOverride: 0,
         degradationRate: parseFloat(model.degradationRate),
         projectLife: model.projectLife,
         discountRate: parseFloat(model.discountRate),
@@ -102,7 +109,7 @@ export default function Dashboard() {
     setResults(calculateSolarModel(inputs));
   }, [inputs]);
 
-  const handleInputChange = (key: keyof SolarInputs, value: number) => {
+  const handleInputChange = (key: keyof SolarInputs, value: number | boolean) => {
     setInputs(prev => ({ ...prev, [key]: value }));
   };
 
@@ -408,6 +415,84 @@ export default function Dashboard() {
                       onChange={(e) => handleInputChange("developmentPremiumPerMW", Number(e.target.value.replace(/,/g, '')))} 
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        id="devPremiumEnabled"
+                        checked={inputs.developmentPremiumEnabled}
+                        onChange={(e) => handleInputChange("developmentPremiumEnabled", e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="devPremiumEnabled" className="cursor-pointer">Include Developer Premium in CAPEX</Label>
+                    </div>
+                  </div>
+
+                  {inputs.developmentPremiumEnabled && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label>Dev Premium Discount (%)</Label>
+                        <span className="text-sm font-mono">{inputs.developmentPremiumDiscount.toFixed(1)}%</span>
+                      </div>
+                      <Slider 
+                        value={[inputs.developmentPremiumDiscount]} 
+                        min={0} max={100} step={0.5} 
+                        onValueChange={(v) => handleInputChange("developmentPremiumDiscount", v[0])} 
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Land Option Cost per MW/year (£)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.landOptionCostPerMWYear)}</span>
+                    </div>
+                    <Input 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.landOptionCostPerMWYear)} 
+                      onChange={(e) => handleInputChange("landOptionCostPerMWYear", Number(e.target.value.replace(/,/g, '')))} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        id="landOptionEnabled"
+                        checked={inputs.landOptionEnabled}
+                        onChange={(e) => handleInputChange("landOptionEnabled", e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="landOptionEnabled" className="cursor-pointer">Include Land Option Cost in OPEX</Label>
+                    </div>
+                  </div>
+
+                  {inputs.landOptionEnabled && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label>Land Option Discount (%)</Label>
+                        <span className="text-sm font-mono">{inputs.landOptionDiscount.toFixed(1)}%</span>
+                      </div>
+                      <Slider 
+                        value={[inputs.landOptionDiscount]} 
+                        min={0} max={100} step={0.5} 
+                        onValueChange={(v) => handleInputChange("landOptionDiscount", v[0])} 
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Cost Inflation Rate (CPI %)</Label>
+                      <span className="text-sm font-mono">{inputs.costInflationRate.toFixed(2)}%</span>
+                    </div>
+                    <Slider 
+                      value={[inputs.costInflationRate]} 
+                      min={0} max={10} step={0.1} 
+                      onValueChange={(v) => handleInputChange("costInflationRate", v[0])} 
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -473,6 +558,20 @@ export default function Dashboard() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Irradiance Override (kWh/m²/year)</Label>
+                      <span className="text-sm font-mono">{inputs.irradianceOverride === 0 ? "Default" : inputs.irradianceOverride.toFixed(2)}</span>
+                    </div>
+                    <Input 
+                      type="number" 
+                      step="0.01"
+                      value={inputs.irradianceOverride} 
+                      onChange={(e) => handleInputChange("irradianceOverride", Number(e.target.value))} 
+                      placeholder="0 = use default from generation/MW"
+                    />
+                  </div>
+
                    <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
@@ -487,7 +586,7 @@ export default function Dashboard() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Degradation</Label>
+                      <Label>Panel Degradation (%)</Label>
                       <div className="relative">
                         <Input 
                           type="number" 

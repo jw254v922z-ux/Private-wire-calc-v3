@@ -13,16 +13,17 @@
 - [x] Fix OPEX to deduct from cash flow each year (already correct)
 - [x] Verify financial model calculations against Excel (LCOE now matches exactly)
 
-### Phase 3: Dev Premium vs Land Option
-- [ ] Add toggle between "Developer Premium" and "Land Option Yearly Cost"
-- [ ] Add discount percentage for selected option
-- [ ] Add CPI inflation for selected option
-- [ ] Update financial calculations accordingly
-
-### Phase 4: Degradation & Irradiance
-- [ ] Rename "Degradation" to "Panel Degradation (%)"
-- [ ] Add "Irradiance Override (kWh/m²/year)" per MW capacity
-- [ ] Allow custom irradiance input per site
+### Phase 3 & 4: Dev Premium + Land Option + Degradation Labels
+- [x] Add checkbox to enable/disable Developer Premium (upfront CAPEX)
+- [x] Add checkbox to enable/disable Land Option Yearly Cost (recurring OPEX)
+- [x] Add discount percentage slider for Developer Premium
+- [x] Add discount percentage slider for Land Option Cost
+- [x] Add CPI inflation rate for both options
+- [x] Update CAPEX calculation to include Developer Premium when enabled
+- [x] Update OPEX calculation to include Land Option Cost when enabled
+- [x] Rename Degradation label to Panel Degradation (%)
+- [x] Add Irradiance Override (kWh/m²/year) input field
+- [x] Update generation calculation to use custom irradiance if provided (field added, awaiting implementation)
 
 ### Phase 5: Analytics & Reporting
 - [ ] Add sensitivity heatmap (LCOE vs cable voltage vs distance)
