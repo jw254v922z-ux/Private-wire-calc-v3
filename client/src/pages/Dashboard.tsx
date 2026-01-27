@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { calculateSolarModel, defaultInputs, SolarInputs, SolarResults } from "@/lib/calculator";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
-import { BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
+import { AlertCircle, BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MetricCard } from "../components/MetricCard";
@@ -213,7 +213,9 @@ export default function Dashboard() {
     document.body.removeChild(link);
   };
 
-  if (!isAuthenticated) {
+  const [guestMode, setGuestMode] = useState(false);
+
+  if (!isAuthenticated && !guestMode) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -221,7 +223,7 @@ export default function Dashboard() {
             <CardTitle>Welcome to Private Wire Solar Calculator</CardTitle>
             <CardDescription>Sign in to save and manage your solar project models</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Button 
               onClick={() => window.location.href = getLoginUrl()} 
               className="w-full"
@@ -229,6 +231,25 @@ export default function Dashboard() {
             >
               Sign In with Manus
             </Button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300"></span>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-slate-950 text-gray-500">or</span>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setGuestMode(true)} 
+              variant="outline"
+              className="w-full"
+              size="lg"
+            >
+              Continue as Guest (Read-Only)
+            </Button>
+            <p className="text-xs text-gray-500 text-center mt-4">
+              Guest mode allows you to explore the calculator but you won't be able to save your models.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -265,7 +286,13 @@ export default function Dashboard() {
           </div>
 
           {/* Key Metrics Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+            <MetricCard 
+              title="Total CAPEX" 
+              value={formatCurrency(results.summary.totalCapex)} 
+              icon={Factory}
+              className="bg-white/5 border-l-orange-400 text-white border-white/10 backdrop-blur-sm"
+            />
             <MetricCard 
               title="LCOE (Real)" 
               value={formatCurrency(results.summary.lcoe) + "/MWh"} 
@@ -290,11 +317,44 @@ export default function Dashboard() {
               icon={Factory}
               className="bg-white/5 border-l-purple-400 text-white border-white/10 backdrop-blur-sm"
             />
+            <MetricCard 
+              title="Annual Savings" 
+              value={formatCurrency(results.summary.annualSavings) + "/year"} 
+              icon={Zap}
+              className="bg-white/5 border-l-green-400 text-white border-white/10 backdrop-blur-sm"
+            />
           </div>
         </div>
       </div>
 
-      <div className="container -mt-16 relative z-20">
+      {/* Disclaimer Banner */}
+      <div className="bg-amber-50 dark:bg-amber-950 border-l-4 border-amber-400 p-4 mb-8">
+        <div className="container">
+          <div className="flex gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Tool Limitations & Disclaimer</h3>
+              <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                This calculator provides indicative financial projections based on industry assumptions and publicly available data sources (valid as of January 2026). 
+                Results should not be relied upon for investment decisions without independent professional verification. Grid costs, irradiance data, and technology assumptions may vary significantly by location and change over time.
+              </p>
+              <button className="text-sm font-medium text-amber-700 dark:text-amber-300 hover:underline">
+                View full disclaimer & sources
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            {guestMode && (
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-3 text-sm">
+                <p className="text-blue-900 dark:text-blue-100">
+                  <strong>Guest Mode:</strong> You're using the calculator in read-only mode. Sign in to save your models.
+                </p>
+              </div>
+            )}
+
+            <div className="container -mt-16 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Sidebar with Model Management */}
@@ -602,7 +662,7 @@ export default function Dashboard() {
 
                 <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
                   <DialogTrigger asChild>
-                    <Button className="w-full" size="lg">
+                    <Button className="w-full" size="lg" disabled={guestMode}>
                       <Save className="mr-2 h-4 w-4" /> {currentModelId ? "Update" : "Save"} Model
                     </Button>
                   </DialogTrigger>

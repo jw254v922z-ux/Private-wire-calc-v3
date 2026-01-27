@@ -56,6 +56,7 @@ export interface SolarResults {
     irr: number;
     paybackPeriod: number;
     capexPerMW: number;
+    annualSavings: number;
   };
 }
 
@@ -102,7 +103,12 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
     ? inputs.landOptionCostPerMWYear * inputs.mw * (1 - inputs.landOptionDiscount / 100)
     : 0;
   
-  const annualGenYear1 = inputs.generationPerMW * inputs.mw;
+  // If irradiance override is provided, use it to calculate generation
+  // Otherwise use the default generationPerMW value
+  const effectiveGenerationPerMW = inputs.irradianceOverride > 0 
+    ? inputs.irradianceOverride 
+    : inputs.generationPerMW;
+  const annualGenYear1 = effectiveGenerationPerMW * inputs.mw;
 
   let cumulativeCashFlow = -totalCapex;
   let cumulativeDiscountedCashFlow = -totalCapex;
@@ -212,6 +218,7 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
       irr,
       paybackPeriod,
       capexPerMW: totalCapex / inputs.mw,
+      annualSavings: (totalEnergy / inputs.projectLife) * inputs.powerPrice, // Average annual generation * PPA price
     }
   };
 }
