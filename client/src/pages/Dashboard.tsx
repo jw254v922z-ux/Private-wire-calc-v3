@@ -16,6 +16,7 @@ import { MetricCard } from "../components/MetricCard";
 import { GridConnectionCostBreakdown } from "../components/GridConnectionCostBreakdown";
 import { GridConnectionSliders, type GridConnectionCosts } from "../components/GridConnectionSliders";
 import { SensitivityHeatmap } from "../components/SensitivityHeatmap";
+import { CashFlowTable } from "../components/CashFlowTable";
 import { calculateSensitivityMatrix } from "@/lib/sensitivity";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -773,28 +774,7 @@ export default function Dashboard() {
               </TabsList>
               
               <TabsContent value="cashflow">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Annual Cash Flow</CardTitle>
-                    <CardDescription>Undiscounted annual cash flows over project life</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-[500px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={results.yearlyData} margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="year" />
-                        <YAxis tickFormatter={(val) => `£${val/1000000}m`} />
-                        <Tooltip formatter={(val: number) => formatCurrency(val)} />
-                        <Legend />
-                        <Bar dataKey="cashFlow" name="Net Cash Flow" fill="#0ea5e9">
-                          {results.yearlyData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.cashFlow >= 0 ? "#10b981" : "#ef4444"} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
+                <CashFlowTable yearlyData={results.yearlyData} projectName={modelName || "Solar Project"} />
               </TabsContent>
 
               <TabsContent value="cumulative">
