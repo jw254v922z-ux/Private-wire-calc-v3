@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Info, ChevronDown, ChevronUp } from "lucide-react";
 
 interface CostItem {
   label: string;
@@ -14,6 +14,7 @@ interface CostItem {
 }
 
 interface GridConnectionCostBreakdownProps {
+  setShowSourceInfo?: (key: string) => void;
   costs: {
     agriculturalTrenchingMin: number;
     agriculturalTrenchingMax: number;

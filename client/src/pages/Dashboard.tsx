@@ -2,13 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { calculateSolarModel, defaultInputs, SolarInputs, SolarResults } from "@/lib/calculator";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
-import { AlertCircle, BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
+import { AlertCircle, Info, BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MetricCard } from "../components/MetricCard";
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [currentModelId, setCurrentModelId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+  const [showSourceInfo, setShowSourceInfo] = useState<string | null>(null);
   const [gridConnectionCosts, setGridConnectionCosts] = useState<GridConnectionCosts | null>(null);
 
   const { data: savedModels = [], refetch: refetchModels } = trpc.solar.list.useQuery(undefined, {
@@ -101,6 +103,8 @@ export default function Dashboard() {
         percentConsumptionExport: model.percentConsumptionExport || 0,
         exportPrice: model.exportPrice || 50,
         offsetableEnergyCost: model.offsetableEnergyCost || 120,
+        gridCostOverrideEnabled: false,
+        gridCostOverride: 0,
       });
       setModelName(model.name);
       setModelDescription(model.description || "");
@@ -629,6 +633,35 @@ export default function Dashboard() {
                     />
                   </div>
 
+                  {/* Grid Cost Override Section */}
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Checkbox 
+                        checked={inputs.gridCostOverrideEnabled}
+                        onCheckedChange={(checked: boolean) => handleInputChange("gridCostOverrideEnabled", checked)}
+                      />
+                      <Label className="font-semibold">Override Grid Connection Costs</Label>
+                    </div>
+                    
+                    {inputs.gridCostOverrideEnabled && (
+                      <div className="space-y-2 bg-blue-50 dark:bg-blue-950 p-3 rounded">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                          Enter total grid connection cost (£). This overrides all calculated grid costs.
+                        </p>
+                        <div className="flex justify-between">
+                          <Label>Total Grid Cost (£)</Label>
+                          <span className="text-sm font-mono">{formatNumberWithCommas(inputs.gridCostOverride)}</span>
+                        </div>
+                        <Input 
+                          type="text" 
+                          value={formatNumberWithCommas(inputs.gridCostOverride)} 
+                          onChange={(e) => handleInputChange("gridCostOverride", Number(e.target.value.replace(/,/g, '')))} 
+                          placeholder="Enter total grid cost"
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <Label>Irradiance Override (kWh/m²/year)</Label>
@@ -820,6 +853,45 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Source Info Modal */}
+      <Dialog open={!!showSourceInfo} onOpenChange={() => setShowSourceInfo(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Source Information</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm space-y-2">
+            {showSourceInfo === 'gridCost' && (
+              <>
+                <p><strong>Grid Connection Costs</strong></p>
+                <p>Based on SSEN Distribution cost estimates (2025) for typical private wire infrastructure including cable, transformers, and wayleave.</p>
+                <p className="text-xs text-gray-500">Actual costs vary by location, voltage, and site conditions.</p>
+              </>
+            )}
+            {showSourceInfo === 'cable' && (
+              <>
+                <p><strong>Cable Costs</strong></p>
+                <p>Based on current market pricing for underground and overhead cable installation in the UK.</p>
+                <p className="text-xs text-gray-500">Includes trenching, laying, and termination.</p>
+              </>
+            )}
+            {showSourceInfo === 'transformer' && (
+              <>
+                <p><strong>Transformer Costs</strong></p>
+                <p>Based on manufacturer quotes for oil-immersed distribution transformers.</p>
+                <p className="text-xs text-gray-500">Includes installation and commissioning.</p>
+              </>
+            )}
+            {showSourceInfo === 'wayleave' && (
+              <>
+                <p><strong>Wayleave Costs</strong></p>
+                <p>Annual wayleave charges for crossing third-party land, based on typical UK rates.</p>
+                <p className="text-xs text-gray-500">Subject to negotiation and site-specific conditions.</p>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Disclaimer Modal */}
       <Dialog open={showDisclaimerModal} onOpenChange={setShowDisclaimerModal}>

@@ -22,6 +22,8 @@ export interface SolarInputs {
   percentConsumptionExport: number; // % of generation exported at export price
   exportPrice: number; // £/MWh for exported power
   offsetableEnergyCost: number; // £/MWh - counterfactual cost of energy without solar (for savings calc)
+  gridCostOverrideEnabled: boolean; // Enable/disable grid cost overrides
+  gridCostOverride: number; // Custom total grid connection cost (£) when override enabled
 }
 
 export interface YearData {
@@ -95,8 +97,9 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
     ? inputs.developmentPremiumPerMW * inputs.mw * (1 - inputs.developmentPremiumDiscount / 100)
     : 0;
   
-  // CAPEX = EPC Cost + Private Wire + Developer Premium (if enabled)
-  const totalCapex = (inputs.capexPerMW * inputs.mw) + inputs.privateWireCost + developerPremiumAmount;
+  // CAPEX = EPC Cost + Private Wire + Developer Premium (if enabled) + Grid Cost (or override)
+  const gridCost = inputs.gridCostOverrideEnabled ? inputs.gridCostOverride : inputs.gridConnectionCost;
+  const totalCapex = (inputs.capexPerMW * inputs.mw) + inputs.privateWireCost + developerPremiumAmount + gridCost;
   
   // Base OPEX + Land Option Cost (if enabled) with discount
   const annualOpexYear1 = inputs.opexPerMW * inputs.mw; // The Excel used a fixed 15.1 * MW * 1000 formula, we generalize it
@@ -251,4 +254,6 @@ export const defaultInputs: SolarInputs = {
   percentConsumptionExport: 0, // 0% exported by default
   exportPrice: 50, // Export price typically lower than PPA price
   offsetableEnergyCost: 120, // Counterfactual cost of energy without solar (for savings calculation)
+  gridCostOverrideEnabled: false,
+  gridCostOverride: 0,
 };
