@@ -18,6 +18,7 @@ import { GridConnectionSliders, type GridConnectionCosts } from "../components/G
 import { SensitivityHeatmap } from "../components/SensitivityHeatmap";
 import { CashFlowTable } from "../components/CashFlowTable";
 import { calculateSensitivityMatrix } from "@/lib/sensitivity";
+import { generatePDFReport } from "@/lib/pdfReport";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -303,11 +304,16 @@ export default function Dashboard() {
             </div>
             <div className="flex gap-2">
               <Button onClick={exportCSV} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-                <Download className="mr-2 h-4 w-4" /> Export
+                <Download className="mr-2 h-4 w-4" /> Export CSV
               </Button>
-              <Button onClick={() => logout()} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-                <LogOut className="mr-2 h-4 w-4" /> Sign Out
+              <Button onClick={() => generatePDFReport({ inputs, results, projectName: modelName || "Solar Project", description: modelDescription })} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+                <Download className="mr-2 h-4 w-4" /> Export PDF
               </Button>
+              {isAuthenticated && (
+                <Button onClick={() => logout()} variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+                  <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                </Button>
+              )}
             </div>
           </div>
 
