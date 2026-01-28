@@ -15,6 +15,8 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, Line
 import { MetricCard } from "../components/MetricCard";
 import { GridConnectionCostBreakdown } from "../components/GridConnectionCostBreakdown";
 import { GridConnectionSliders, type GridConnectionCosts } from "../components/GridConnectionSliders";
+import { SensitivityHeatmap } from "../components/SensitivityHeatmap";
+import { calculateSensitivityMatrix } from "@/lib/sensitivity";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -24,6 +26,7 @@ export default function Dashboard() {
   const { user, logout, isAuthenticated } = useAuth();
   const [inputs, setInputs] = useState<SolarInputs>(defaultInputs);
   const [results, setResults] = useState<SolarResults>(calculateSolarModel(defaultInputs));
+  const [sensitivityMatrix, setSensitivityMatrix] = useState(calculateSensitivityMatrix(defaultInputs));
   const [modelName, setModelName] = useState("My Solar Model");
   const [modelDescription, setModelDescription] = useState("");
   const [currentModelId, setCurrentModelId] = useState<number | null>(null);
@@ -113,6 +116,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     setResults(calculateSolarModel(inputs));
+    setSensitivityMatrix(calculateSensitivityMatrix(inputs));
   }, [inputs]);
 
   const handleInputChange = (key: keyof SolarInputs, value: number | boolean) => {
@@ -760,11 +764,12 @@ export default function Dashboard() {
           <div className="lg:col-span-8 space-y-6">
             
             <Tabs defaultValue="gridcosts" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-4">
+              <TabsList className="grid w-full grid-cols-5 mb-4">
                 <TabsTrigger value="gridcosts">Private Wire Parameters</TabsTrigger>
                 <TabsTrigger value="cashflow">Cash Flow Analysis</TabsTrigger>
                 <TabsTrigger value="cumulative">Cumulative Returns</TabsTrigger>
                 <TabsTrigger value="generation">Generation & Revenue</TabsTrigger>
+                <TabsTrigger value="sensitivity">Sensitivity Analysis</TabsTrigger>
               </TabsList>
               
               <TabsContent value="cashflow">
@@ -853,6 +858,10 @@ export default function Dashboard() {
                     handleInputChange("privateWireCost", Math.round(avgCost));
                   }}
                 />
+              </TabsContent>
+              
+              <TabsContent value="sensitivity">
+                <SensitivityHeatmap matrix={sensitivityMatrix} />
               </TabsContent>
             </Tabs>
 
