@@ -48,6 +48,7 @@ export const solarModels = mysqlTable("solar_models", {
   percentConsumptionPPA: int("percentConsumptionPPA").default(100).notNull(),
   percentConsumptionExport: int("percentConsumptionExport").default(0).notNull(),
   exportPrice: int("exportPrice").default(50).notNull(),
+  offsetableEnergyCost: int("offsetableEnergyCost").default(120).notNull(),
   lcoe: varchar("lcoe", { length: 20 }),
   irr: varchar("irr", { length: 20 }),
   paybackPeriod: varchar("paybackPeriod", { length: 20 }),

@@ -83,6 +83,8 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
       roadPercentage,
       roadCrossings,
       includeStepDownInstallation,
+      wayleaveDiscount: 0,
+      roadCableLayingCostPerKm: 0,
       cableCostMin: costs.cableCost.min,
       cableCostMax: costs.cableCost.max,
       stepUpCostMin: costs.stepUpCost.min,

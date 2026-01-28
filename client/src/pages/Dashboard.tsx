@@ -99,6 +99,7 @@ export default function Dashboard() {
         percentConsumptionPPA: model.percentConsumptionPPA || 100,
         percentConsumptionExport: model.percentConsumptionExport || 0,
         exportPrice: model.exportPrice || 50,
+        offsetableEnergyCost: model.offsetableEnergyCost || 120,
       });
       setModelName(model.name);
       setModelDescription(model.description || "");
@@ -258,6 +259,21 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-12">
+      {/* Disclaimer Banner - Top */}
+      <div className="bg-amber-50 dark:bg-amber-950 border-b-2 border-amber-400 p-3">
+        <div className="container">
+          <div className="flex gap-2 items-center justify-between">
+            <div className="flex gap-2 items-center flex-1">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <p className="text-xs text-amber-800 dark:text-amber-200">
+                <strong>Disclaimer:</strong> Indicative projections based on Jan 2026 data. Not for investment decisions without professional verification.
+                <a href="#disclaimer-modal" className="ml-2 font-semibold text-amber-700 dark:text-amber-300 hover:underline">View full details</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Header */}
       <div className="relative bg-slate-900 text-white pb-24 pt-12 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-40">
@@ -327,26 +343,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Disclaimer Banner */}
-      <div className="bg-amber-50 dark:bg-amber-950 border-l-4 border-amber-400 p-4 mb-8">
-        <div className="container">
-          <div className="flex gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Tool Limitations & Disclaimer</h3>
-              <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
-                This calculator provides indicative financial projections based on industry assumptions and publicly available data sources (valid as of January 2026). 
-                Results should not be relied upon for investment decisions without independent professional verification. Grid costs, irradiance data, and technology assumptions may vary significantly by location and change over time.
-              </p>
-              <button className="text-sm font-medium text-amber-700 dark:text-amber-300 hover:underline">
-                View full disclaimer & sources
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-            {guestMode && (
+      {guestMode && (
               <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-3 text-sm">
                 <p className="text-blue-900 dark:text-blue-100">
                   <strong>Guest Mode:</strong> You're using the calculator in read-only mode. Sign in to save your models.

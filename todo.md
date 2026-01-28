@@ -5,6 +5,8 @@
 ### Phase 1: UI Enhancements and Disclaimers
 - [x] Add total CAPEX display at top of page
 - [x] Add disclaimer banner explaining tool limitations, validity date, and data sources
+- [x] Move disclaimer to top of page as single-line banner
+- [x] Add "View full details" link to disclaimer
 - [ ] Preserve private wire parameters when switching between tabs
 - [ ] Show info icons (ⓘ) for grid costs and researched costs with source links
 
@@ -16,6 +18,8 @@
 ### Phase 3: Financial Model Fixes and Calculations
 - [x] Fix irradiance override to actually affect revenue calculations
 - [x] Add annual savings calculation based on "Offsetable energy cost" counter-factual
+- [x] Add offsetable energy cost input field with note about energy pricing tool
+- [x] Add offsetable energy cost to database schema
 - [ ] Remove ability to discount CAPEX (all CAPEX is Year 0) - already correct
 - [ ] Account for road cable laying costs (traffic management, trenching, reinstatement)
 

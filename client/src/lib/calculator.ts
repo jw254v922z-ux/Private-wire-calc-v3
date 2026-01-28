@@ -21,6 +21,7 @@ export interface SolarInputs {
   percentConsumptionPPA: number; // % of generation consumed at PPA price
   percentConsumptionExport: number; // % of generation exported at export price
   exportPrice: number; // £/MWh for exported power
+  offsetableEnergyCost: number; // £/MWh - counterfactual cost of energy without solar (for savings calc)
 }
 
 export interface YearData {
@@ -249,4 +250,5 @@ export const defaultInputs: SolarInputs = {
   percentConsumptionPPA: 100, // 100% consumed at PPA price by default
   percentConsumptionExport: 0, // 0% exported by default
   exportPrice: 50, // Export price typically lower than PPA price
+  offsetableEnergyCost: 120, // Counterfactual cost of energy without solar (for savings calculation)
 };
