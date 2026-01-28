@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [modelDescription, setModelDescription] = useState("");
   const [currentModelId, setCurrentModelId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
   const [gridConnectionCosts, setGridConnectionCosts] = useState<GridConnectionCosts | null>(null);
 
   const { data: savedModels = [], refetch: refetchModels } = trpc.solar.list.useQuery(undefined, {
@@ -267,7 +268,7 @@ export default function Dashboard() {
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <p className="text-xs text-amber-800 dark:text-amber-200">
                 <strong>Disclaimer:</strong> Indicative projections based on Jan 2026 data. Not for investment decisions without professional verification.
-                <a href="#disclaimer-modal" className="ml-2 font-semibold text-amber-700 dark:text-amber-300 hover:underline">View full details</a>
+                <button onClick={() => setShowDisclaimerModal(true)} className="ml-2 font-semibold text-amber-700 dark:text-amber-300 hover:underline cursor-pointer">View full details</button>
               </p>
             </div>
           </div>
@@ -617,6 +618,19 @@ export default function Dashboard() {
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
+                      <Label>Offsetable Energy Cost (£/MWh)</Label>
+                      <span className="text-sm font-mono">{formatNumberWithCommas(inputs.offsetableEnergyCost)}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">Use energy pricing tool for accurate site-specific info</p>
+                    <Input 
+                      type="text" 
+                      value={formatNumberWithCommas(inputs.offsetableEnergyCost)} 
+                      onChange={(e) => handleInputChange("offsetableEnergyCost", Number(e.target.value.replace(/,/g, '')))} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
                       <Label>Irradiance Override (kWh/m²/year)</Label>
                       <span className="text-sm font-mono">{inputs.irradianceOverride === 0 ? "Default" : inputs.irradianceOverride.toFixed(2)}</span>
                     </div>
@@ -806,6 +820,46 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Disclaimer Modal */}
+      <Dialog open={showDisclaimerModal} onOpenChange={setShowDisclaimerModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tool Limitations & Disclaimer</DialogTitle>
+            <DialogDescription>Important information about this calculator</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div>
+              <h3 className="font-semibold mb-2">Validity & Data Sources</h3>
+              <p>This calculator provides indicative financial projections based on industry assumptions and publicly available data sources. All data and assumptions are valid as of January 2026.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Limitations</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Results are for indicative purposes only and should not be relied upon for investment decisions</li>
+                <li>Grid costs, irradiance data, and technology assumptions may vary significantly by location</li>
+                <li>Costs and pricing may change over time</li>
+                <li>Site-specific conditions (soil, access, environmental) are not accounted for</li>
+                <li>This tool does not include all potential costs (e.g., planning, environmental surveys, financing)</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Professional Verification Required</h3>
+              <p>Results should not be relied upon for investment decisions without independent professional verification from qualified engineers, surveyors, and financial advisors.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Data Sources</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Grid connection costs: SSEN Distribution Cost Estimates (2025)</li>
+                <li>Solar irradiance: UK Met Office historical averages</li>
+                <li>EPC costs: Industry benchmarks (2026)</li>
+                <li>Transformer costs: Manufacturer quotes</li>
+                <li>Cable costs: Supplier pricing data</li>
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
