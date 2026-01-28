@@ -14,7 +14,6 @@ interface CostItem {
 }
 
 interface GridConnectionCostBreakdownProps {
-  setShowSourceInfo?: (key: string) => void;
   costs: {
     agriculturalTrenchingMin: number;
     agriculturalTrenchingMax: number;
@@ -42,9 +41,10 @@ interface GridConnectionCostBreakdownProps {
     projectMax: number;
   };
   onUpdate: (updatedCosts: Partial<Record<string, number>>) => void;
+  setShowSourceInfo?: (key: string) => void;
 }
 
-export function GridConnectionCostBreakdown({ costs, onUpdate }: GridConnectionCostBreakdownProps) {
+export function GridConnectionCostBreakdown({ costs, onUpdate, setShowSourceInfo }: GridConnectionCostBreakdownProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     trenching: true,
     infrastructure: true,
@@ -251,6 +251,18 @@ export function GridConnectionCostBreakdown({ costs, onUpdate }: GridConnectionC
 
           <TabsContent value="summary" className="mt-4">
             <div className="space-y-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-lg">Grid Connection Cost Summary</h3>
+                {setShowSourceInfo && (
+                  <button 
+                    onClick={() => setShowSourceInfo('gridCost')}
+                    className="text-blue-500 hover:text-blue-700 p-1 h-6 w-6"
+                    title="View source information"
+                  >
+                    <Info className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-slate-600">Total Construction Cost Range</p>
                 <p className="text-2xl font-bold text-blue-900 mt-1">

@@ -455,7 +455,16 @@ export default function Dashboard() {
                     </div>
                     {gridConnectionCosts && (
                       <div className="text-xs text-slate-500 bg-blue-50 p-2 rounded">
-                        <div className="font-semibold">Grid Connection Estimate:</div>
+                        <div className="flex items-center justify-between font-semibold">
+                          <span>Grid Connection Estimate:</span>
+                          <button 
+                            onClick={() => setShowSourceInfo('gridCost')}
+                            className="text-blue-500 hover:text-blue-700 p-0 h-4 w-4"
+                            title="View source information"
+                          >
+                            <Info className="h-4 w-4" />
+                          </button>
+                        </div>
                         <div>{formatCurrency((gridConnectionCosts.totalCostMin + gridConnectionCosts.totalCostMax) / 2)}</div>
                       </div>
                     )}
