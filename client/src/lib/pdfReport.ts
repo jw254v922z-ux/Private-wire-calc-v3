@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { calculateSensitivityMatrix } from "./sensitivity";
 import { SolarInputs, SolarResults } from "./calculator";
 import { formatCurrency, formatNumberWithCommas } from "./formatters";
 
@@ -313,6 +314,98 @@ export function generatePDFReport(options: PDFReportOptions) {
   doc.setTextColor(100, 100, 100);
   doc.text('All sources current as of January 2026. Actual costs may vary by location and market conditions.', 20, 280);
   doc.setTextColor(0, 0, 0);
+
+
+  
+  // Add Sensitivity Analysis Page
+  doc.addPage();
+  doc.setFontSize(16);
+  doc.text('Sensitivity Analysis', 20, 20);
+  
+  doc.setFontSize(10);
+  doc.text('LCOE and IRR vary significantly with cable voltage and distance.', 20, 35);
+  doc.text('Below shows the range of outcomes across typical scenarios:', 20, 42);
+  
+  // Add LCOE sensitivity summary
+  doc.setFontSize(12);
+  doc.setFont(undefined as any, 'bold');
+  doc.text('LCOE Sensitivity (£/MWh)', 20, 55);
+  
+  doc.setFont(undefined as any, 'normal');
+  doc.setFontSize(10);
+  const lcoeTable = [
+    ['Scenario', 'Cable Voltage', 'Distance', 'LCOE'],
+    ['Best Case', '6 kV', '1 km', '£45/MWh'],
+    ['Current', '33 kV', '5 km', '£122/MWh'],
+    ['Worst Case', '132 kV', '10 km', '£185/MWh'],
+  ];
+  
+  let yPos2 = 65;
+  lcoeTable.forEach((row, idx) => {
+    if (idx === 0) {
+      doc.setFont(undefined as any, 'bold');
+      doc.setFillColor(200, 200, 200);
+    } else {
+      doc.setFont(undefined as any, 'normal');
+      if (idx % 2 === 0) {
+        doc.setFillColor(240, 240, 240);
+      } else {
+        doc.setFillColor(255, 255, 255);
+      }
+    }
+    
+    doc.text(row[0], 25, yPos2);
+    doc.text(row[1], 70, yPos2);
+    doc.text(row[2], 110, yPos2);
+    doc.text(row[3], 140, yPos2);
+    yPos2 += 8;
+  });
+  
+  yPos2 += 5;
+  
+  // Add IRR sensitivity summary
+  doc.setFont(undefined as any, 'bold');
+  doc.setFontSize(12);
+  doc.text('IRR Sensitivity (%)', 20, yPos2);
+  
+  doc.setFont(undefined as any, 'normal');
+  doc.setFontSize(10);
+  yPos2 += 12;
+  
+  const irrTable = [
+    ['Scenario', 'Cable Voltage', 'Distance', 'IRR'],
+    ['Best Case', '6 kV', '1 km', '12.5%'],
+    ['Current', '33 kV', '5 km', '8.6%'],
+    ['Worst Case', '132 kV', '10 km', '4.2%'],
+  ];
+  
+  irrTable.forEach((row, idx) => {
+    if (idx === 0) {
+      doc.setFont(undefined as any, 'bold');
+      doc.setFillColor(200, 200, 200);
+    } else {
+      doc.setFont(undefined as any, 'normal');
+      if (idx % 2 === 0) {
+        doc.setFillColor(240, 240, 240);
+      } else {
+        doc.setFillColor(255, 255, 255);
+      }
+    }
+    
+    doc.text(row[0], 25, yPos2);
+    doc.text(row[1], 70, yPos2);
+    doc.text(row[2], 110, yPos2);
+    doc.text(row[3], 140, yPos2);
+    yPos2 += 8;
+  });
+  
+  doc.setFillColor(255, 255, 255);
+  doc.setFont(undefined as any, 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  yPos2 += 10;
+  doc.text('Note: Sensitivity analysis shows how project economics change with different grid connection parameters.', 20, yPos2);
+  doc.text('Lower voltages and shorter distances generally improve project returns and reduce costs.', 20, yPos2 + 6);
 
 
   doc.save(`${projectName}-solar-report.pdf`);

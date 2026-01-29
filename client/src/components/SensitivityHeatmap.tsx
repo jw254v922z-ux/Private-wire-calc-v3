@@ -1,27 +1,48 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SensitivityMatrix, getHeatmapColor } from "@/lib/sensitivity";
+import { SolarInputs } from "@/lib/calculator";
 
 interface SensitivityHeatmapProps {
   matrix: SensitivityMatrix;
+  currentInputs?: SolarInputs;
   title?: string;
+  metric?: "lcoe" | "irr";
 }
 
-export function SensitivityHeatmap({ matrix, title = "LCOE Sensitivity Analysis" }: SensitivityHeatmapProps) {
+export function SensitivityHeatmap({ 
+  matrix, 
+  currentInputs,
+  title = "Sensitivity Analysis", 
+  metric = "lcoe" 
+}: SensitivityHeatmapProps) {
   const cellSize = 50;
   const labelWidth = 80;
   const labelHeight = 40;
   
-  // Find the current scenario (closest to base values)
-  const currentVoltageIdx = matrix.voltages.indexOf(33); // Default 33kV
-  const currentDistanceIdx = 4; // Default ~5km
+  // Determine current scenario based on inputs
+  let currentVoltageIdx = matrix.voltages.indexOf(33); // Default 33kV
+  let currentDistanceIdx = 4; // Default ~5km
+  
+  // Try to find actual current scenario from inputs
+  if (currentInputs) {
+    // Extract voltage and distance from grid connection cost if possible
+    // For now, use defaults as we don't have direct access to voltage/distance in inputs
+  }
+
+  const data = metric === "lcoe" ? matrix.lcoeData : matrix.irrData;
+  const minValue = metric === "lcoe" ? matrix.minLcoe : matrix.minIrr;
+  const maxValue = metric === "lcoe" ? matrix.maxLcoe : matrix.maxIrr;
+  const unit = metric === "lcoe" ? "£/MWh" : "%";
+  const metricTitle = metric === "lcoe" ? "LCOE Sensitivity Analysis" : "IRR Sensitivity Analysis";
+  const metricDesc = metric === "lcoe" 
+    ? "Levelized Cost of Energy (£/MWh) across different cable voltages and distances"
+    : "Internal Rate of Return (%) across different cable voltages and distances";
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>
-          LCOE (£/MWh) across different cable voltages and distances
-        </CardDescription>
+        <CardTitle>{title || metricTitle}</CardTitle>
+        <CardDescription>{metricDesc}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -52,10 +73,14 @@ export function SensitivityHeatmap({ matrix, title = "LCOE Sensitivity Analysis"
                 </div>
 
                 {/* Heatmap cells */}
-                {matrix.data[distanceIdx].map((lcoe, voltageIdx) => {
+                {data[distanceIdx].map((value, voltageIdx) => {
                   const isCurrentScenario =
                     distanceIdx === currentDistanceIdx && voltageIdx === currentVoltageIdx;
-                  const color = getHeatmapColor(lcoe, matrix.minLcoe, matrix.maxLcoe);
+                  const color = getHeatmapColor(value, minValue, maxValue);
+                  
+                  const displayValue = metric === "lcoe" 
+                    ? `£${value.toFixed(0)}`
+                    : `${value.toFixed(1)}%`;
 
                   return (
                     <div
@@ -67,17 +92,17 @@ export function SensitivityHeatmap({ matrix, title = "LCOE Sensitivity Analysis"
                         border: isCurrentScenario ? "3px solid #000" : "1px solid #e5e7eb",
                       }}
                       className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity relative group"
-                      title={`${matrix.voltages[voltageIdx]}kV, ${distance}km: £${lcoe.toFixed(2)}/MWh`}
+                      title={`${matrix.voltages[voltageIdx]}kV, ${distance}km: ${displayValue} ${unit}`}
                     >
                       <span className="text-xs font-semibold text-gray-900">
-                        £{lcoe.toFixed(0)}
+                        {displayValue}
                       </span>
 
                       {/* Tooltip */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
                         {matrix.voltages[voltageIdx]}kV, {distance}km
                         <br />
-                        LCOE: £{lcoe.toFixed(2)}/MWh
+                        {metric === "lcoe" ? "LCOE" : "IRR"}: {displayValue} {unit}
                       </div>
                     </div>
                   );
@@ -96,21 +121,25 @@ export function SensitivityHeatmap({ matrix, title = "LCOE Sensitivity Analysis"
                 style={{ width: 30, height: 30, backgroundColor: "rgb(0, 255, 0)" }}
                 className="border border-gray-300"
               />
-              <span className="text-sm">Low Cost (£{matrix.minLcoe.toFixed(0)}/MWh)</span>
+              <span className="text-sm">
+                {metric === "lcoe" ? "Low Cost" : "High Return"} ({minValue.toFixed(1)}{unit})
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <div
                 style={{ width: 30, height: 30, backgroundColor: "rgb(255, 200, 0)" }}
                 className="border border-gray-300"
               />
-              <span className="text-sm">Medium Cost</span>
+              <span className="text-sm">Medium</span>
             </div>
             <div className="flex items-center gap-2">
               <div
                 style={{ width: 30, height: 30, backgroundColor: "rgb(255, 0, 0)" }}
                 className="border border-gray-300"
               />
-              <span className="text-sm">High Cost (£{matrix.maxLcoe.toFixed(0)}/MWh)</span>
+              <span className="text-sm">
+                {metric === "lcoe" ? "High Cost" : "Low Return"} ({maxValue.toFixed(1)}{unit})
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <div
@@ -126,10 +155,12 @@ export function SensitivityHeatmap({ matrix, title = "LCOE Sensitivity Analysis"
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <div className="text-sm font-semibold text-blue-900 mb-2">Key Insights:</div>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Lowest LCOE: £{matrix.minLcoe.toFixed(2)}/MWh</li>
-            <li>• Highest LCOE: £{matrix.maxLcoe.toFixed(2)}/MWh</li>
-            <li>• Difference: £{(matrix.maxLcoe - matrix.minLcoe).toFixed(2)}/MWh</li>
-            <li>• Lower voltages and shorter distances generally reduce costs</li>
+            <li>• Best {metric === "lcoe" ? "LCOE" : "IRR"}: {minValue.toFixed(2)}{unit}</li>
+            <li>• Worst {metric === "lcoe" ? "LCOE" : "IRR"}: {maxValue.toFixed(2)}{unit}</li>
+            <li>• Range: {(maxValue - minValue).toFixed(2)}{unit}</li>
+            <li>• {metric === "lcoe" 
+              ? "Lower voltages and shorter distances generally reduce costs" 
+              : "Higher voltages and shorter distances generally improve returns"}</li>
           </ul>
         </div>
       </CardContent>

@@ -4,14 +4,18 @@ export interface SensitivityResult {
   voltage: number;
   distance: number;
   lcoe: number;
+  irr: number;
 }
 
 export interface SensitivityMatrix {
   voltages: number[];
   distances: number[];
-  data: number[][];
+  lcoeData: number[][];
+  irrData: number[][];
   minLcoe: number;
   maxLcoe: number;
+  minIrr: number;
+  maxIrr: number;
 }
 
 // Cable voltage options (kV)
@@ -55,13 +59,17 @@ function estimateGridCost(voltageKV: number, distanceKm: number): number {
 }
 
 export function calculateSensitivityMatrix(baseInputs: SolarInputs): SensitivityMatrix {
-  const data: number[][] = [];
+  const lcoeData: number[][] = [];
+  const irrData: number[][] = [];
   let minLcoe = Infinity;
   let maxLcoe = -Infinity;
+  let minIrr = Infinity;
+  let maxIrr = -Infinity;
 
-  // Calculate LCOE for each voltage/distance combination
+  // Calculate LCOE and IRR for each voltage/distance combination
   for (const distance of DISTANCES) {
-    const row: number[] = [];
+    const lcoeRow: number[] = [];
+    const irrRow: number[] = [];
     
     for (const voltage of VOLTAGES) {
       // Create modified inputs with new grid cost
@@ -74,29 +82,37 @@ export function calculateSensitivityMatrix(baseInputs: SolarInputs): Sensitivity
       // Calculate solar results
       const results = calculateSolarModel(modifiedInputs);
       const lcoe = results.summary.lcoe;
+      const irr = results.summary.irr;
 
-      row.push(lcoe);
+      lcoeRow.push(lcoe);
+      irrRow.push(irr);
       minLcoe = Math.min(minLcoe, lcoe);
       maxLcoe = Math.max(maxLcoe, lcoe);
+      minIrr = Math.min(minIrr, irr);
+      maxIrr = Math.max(maxIrr, irr);
     }
     
-    data.push(row);
+    lcoeData.push(lcoeRow);
+    irrData.push(irrRow);
   }
 
   return {
     voltages: VOLTAGES,
     distances: DISTANCES,
-    data,
+    lcoeData,
+    irrData,
     minLcoe,
     maxLcoe,
+    minIrr,
+    maxIrr,
   };
 }
 
-// Get color for heatmap based on LCOE value
+// Get color for heatmap based on value
 export function getHeatmapColor(value: number, minValue: number, maxValue: number): string {
   const normalized = (value - minValue) / (maxValue - minValue);
   
-  // Color scale: green (low cost) -> yellow -> red (high cost)
+  // Color scale: green (low cost/high return) -> yellow -> red (high cost/low return)
   if (normalized < 0.33) {
     // Green to yellow
     const t = normalized / 0.33;

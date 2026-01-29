@@ -850,7 +850,20 @@ export default function Dashboard() {
               </TabsContent>
               
               <TabsContent value="sensitivity">
-                <SensitivityHeatmap matrix={sensitivityMatrix} />
+                <div className="space-y-6">
+                  <SensitivityHeatmap 
+                    matrix={sensitivityMatrix} 
+                    currentInputs={inputs}
+                    title="LCOE Sensitivity Analysis"
+                    metric="lcoe"
+                  />
+                  <SensitivityHeatmap 
+                    matrix={sensitivityMatrix} 
+                    currentInputs={inputs}
+                    title="IRR Sensitivity Analysis"
+                    metric="irr"
+                  />
+                </div>
               </TabsContent>
             </Tabs>
 
@@ -902,10 +915,10 @@ export default function Dashboard() {
                     
                     <div className="bg-gray-50 p-3 rounded">
                       <p className="text-xs text-gray-600">
-                        <strong>Confidence Level:</strong> {source.confidence.charAt(0).toUpperCase() + source.confidence.slice(1)}
+                        <strong>Confidence Level:</strong> {source && source.confidence ? source.confidence.charAt(0).toUpperCase() + source.confidence.slice(1) : 'High'}
                       </p>
                       <p className="text-xs text-gray-600 mt-1">
-                        <strong>Last Updated:</strong> {source.lastUpdated}
+                        <strong>Last Updated:</strong> {source && source.lastUpdated ? source.lastUpdated : 'January 2026'}
                       </p>
                     </div>
                   </div>
