@@ -77,6 +77,8 @@ export function calculateSensitivityMatrix(baseInputs: SolarInputs): Sensitivity
       const modifiedInputs: SolarInputs = {
         ...baseInputs,
         gridConnectionCost: gridCost,
+        cableVoltageKV: voltage,
+        distanceKm: distance,
       };
 
       // Calculate solar results
