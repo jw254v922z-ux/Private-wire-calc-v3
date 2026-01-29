@@ -109,8 +109,13 @@ export function calculateSensitivityMatrix(baseInputs: SolarInputs): Sensitivity
 }
 
 // Get color for heatmap based on value
-export function getHeatmapColor(value: number, minValue: number, maxValue: number): string {
-  const normalized = (value - minValue) / (maxValue - minValue);
+export function getHeatmapColor(value: number, minValue: number, maxValue: number, invertScale = false): string {
+  let normalized = (value - minValue) / (maxValue - minValue);
+  
+  // For IRR, invert the scale so higher values are green
+  if (invertScale) {
+    normalized = 1 - normalized;
+  }
   
   // Color scale: green (low cost/high return) -> yellow -> red (high cost/low return)
   if (normalized < 0.33) {

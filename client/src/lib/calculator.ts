@@ -25,6 +25,8 @@ export interface SolarInputs {
   offsetableEnergyCPI: number; // % annual CPI escalation for offsetable energy cost
   gridCostOverrideEnabled: boolean; // Enable/disable grid cost overrides
   gridCostOverride: number; // Custom total grid connection cost (£) when override enabled
+  cableVoltageKV?: number; // Cable voltage in kV (for sensitivity analysis highlighting)
+  distanceKm?: number; // Distance in km (for sensitivity analysis highlighting)
 }
 
 export interface YearData {

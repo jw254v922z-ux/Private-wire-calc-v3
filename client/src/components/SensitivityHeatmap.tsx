@@ -23,10 +23,15 @@ export function SensitivityHeatmap({
   let currentVoltageIdx = matrix.voltages.indexOf(33); // Default 33kV
   let currentDistanceIdx = 4; // Default ~5km
   
-  // Try to find actual current scenario from inputs
-  if (currentInputs) {
-    // Extract voltage and distance from grid connection cost if possible
-    // For now, use defaults as we don't have direct access to voltage/distance in inputs
+  // Use actual voltage and distance from inputs if available
+  if (currentInputs?.cableVoltageKV) {
+    const voltageIdx = matrix.voltages.indexOf(currentInputs.cableVoltageKV);
+    if (voltageIdx >= 0) currentVoltageIdx = voltageIdx;
+  }
+  
+  if (currentInputs?.distanceKm) {
+    const distanceIdx = matrix.distances.indexOf(currentInputs.distanceKm);
+    if (distanceIdx >= 0) currentDistanceIdx = distanceIdx;
   }
 
   const data = metric === "lcoe" ? matrix.lcoeData : matrix.irrData;
@@ -76,7 +81,7 @@ export function SensitivityHeatmap({
                 {data[distanceIdx].map((value, voltageIdx) => {
                   const isCurrentScenario =
                     distanceIdx === currentDistanceIdx && voltageIdx === currentVoltageIdx;
-                  const color = getHeatmapColor(value, minValue, maxValue);
+                  const color = getHeatmapColor(value, minValue, maxValue, metric === 'irr');
                   
                   const displayValue = metric === "lcoe" 
                     ? `£${value.toFixed(0)}`
