@@ -5,6 +5,7 @@ import { SolarInputs } from "@/lib/calculator";
 interface SensitivityHeatmapProps {
   matrix: SensitivityMatrix;
   currentInputs?: SolarInputs;
+  currentResults?: { lcoe: number; irr: number };
   title?: string;
   metric?: "lcoe" | "irr";
 }
@@ -12,6 +13,7 @@ interface SensitivityHeatmapProps {
 export function SensitivityHeatmap({ 
   matrix, 
   currentInputs,
+  currentResults,
   title = "Sensitivity Analysis", 
   metric = "lcoe" 
 }: SensitivityHeatmapProps) {
@@ -155,6 +157,21 @@ export function SensitivityHeatmap({
             </div>
           </div>
         </div>
+
+        {/* Current Scenario Info */}
+        {currentResults && (
+          <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+            <div className="text-sm font-semibold text-green-900 mb-2">Current Project Scenario:</div>
+            <div className="grid grid-cols-2 gap-4 text-sm text-green-800">
+              <div>
+                <span className="font-semibold">LCOE:</span> £{currentResults.lcoe.toFixed(2)}/MWh
+              </div>
+              <div>
+                <span className="font-semibold">IRR:</span> {currentResults.irr.toFixed(2)}%
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Key Insights */}
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
