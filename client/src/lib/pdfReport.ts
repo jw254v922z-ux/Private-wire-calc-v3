@@ -1,5 +1,4 @@
 import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 import { SolarInputs, SolarResults } from "./calculator";
 import { formatCurrency, formatNumberWithCommas } from "./formatters";
 
@@ -21,7 +20,6 @@ export function generatePDFReport(options: PDFReportOptions) {
   } = options;
 
   const doc = new jsPDF();
-  (doc as any).autoTable = autoTable;
   
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -44,6 +42,56 @@ export function generatePDFReport(options: PDFReportOptions) {
     const lines = doc.splitTextToSize(text, pageWidth - 40);
     doc.text(lines, 20, yPosition);
     yPosition += lines.length * 5 + 2;
+  };
+
+  const addSimpleTable = (headers: string[], rows: (string | number)[][], colWidths?: number[]) => {
+    const defaultColWidth = (pageWidth - 40) / headers.length;
+    const widths = colWidths || headers.map(() => defaultColWidth);
+    
+    // Header row
+    doc.setFillColor(41, 128, 185);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    
+    let xPos = 20;
+    headers.forEach((header, i) => {
+      doc.rect(xPos, yPosition, widths[i], 8, "F");
+      doc.text(header, xPos + 2, yPosition + 6);
+      xPos += widths[i];
+    });
+    yPosition += 8;
+    
+    // Data rows
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    
+    rows.forEach((row, rowIndex) => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      // Alternate row colors
+      if (rowIndex % 2 === 1) {
+        doc.setFillColor(245, 245, 245);
+        xPos = 20;
+        headers.forEach((_, i) => {
+          doc.rect(xPos, yPosition, widths[i], 7, "F");
+          xPos += widths[i];
+        });
+      }
+      
+      xPos = 20;
+      row.forEach((cell, i) => {
+        doc.text(String(cell), xPos + 2, yPosition + 5);
+        xPos += widths[i];
+      });
+      yPosition += 7;
+    });
+    
+    yPosition += 3;
   };
 
   const checkPageBreak = (neededSpace: number = 30) => {
@@ -102,18 +150,7 @@ export function generatePDFReport(options: PDFReportOptions) {
     ["Total Generation (25yr)", formatNumberWithCommas(results.summary.totalGeneration.toFixed(0)) + " MWh"],
   ];
 
-  (doc as any).autoTable({
-    head: [metrics[0]],
-    body: metrics.slice(1),
-    startY: yPosition,
-    margin: { left: 20, right: 20 },
-    theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 0 },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-  });
-
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  addSimpleTable(metrics[0] as string[], metrics.slice(1) as (string | number)[][]);
 
   // ===== PROJECT PARAMETERS =====
   checkPageBreak(60);
@@ -130,18 +167,7 @@ export function generatePDFReport(options: PDFReportOptions) {
     ["Offsetable Energy Cost", formatCurrency(inputs.offsetableEnergyCost) + "/MWh"],
   ];
 
-  (doc as any).autoTable({
-    head: [projectParams[0]],
-    body: projectParams.slice(1),
-    startY: yPosition,
-    margin: { left: 20, right: 20 },
-    theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 0 },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-  });
-
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  addSimpleTable(projectParams[0] as string[], projectParams.slice(1) as (string | number)[][]);
 
   // ===== GRID CONNECTION PARAMETERS =====
   checkPageBreak(40);
@@ -154,18 +180,7 @@ export function generatePDFReport(options: PDFReportOptions) {
     ["Private Wire Cost", formatCurrency(inputs.privateWireCost)],
   ];
 
-  (doc as any).autoTable({
-    head: [gridParams[0]],
-    body: gridParams.slice(1),
-    startY: yPosition,
-    margin: { left: 20, right: 20 },
-    theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 0 },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-  });
-
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  addSimpleTable(gridParams[0] as string[], gridParams.slice(1) as (string | number)[][]);
 
   // ===== COST BREAKDOWN =====
   checkPageBreak(50);
@@ -182,18 +197,7 @@ export function generatePDFReport(options: PDFReportOptions) {
     ["Total CAPEX", formatCurrency(results.summary.totalCapex)],
   ];
 
-  (doc as any).autoTable({
-    head: [costBreakdown[0]],
-    body: costBreakdown.slice(1),
-    startY: yPosition,
-    margin: { left: 20, right: 20 },
-    theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 0 },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-  });
-
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  addSimpleTable(costBreakdown[0] as string[], costBreakdown.slice(1) as (string | number)[][]);
 
   // ===== ANNUAL OPEX =====
   checkPageBreak(40);
@@ -206,48 +210,26 @@ export function generatePDFReport(options: PDFReportOptions) {
     ["Total Year 1 OPEX", formatCurrency(results.yearlyData[1]?.opex || 0)],
   ];
 
-  (doc as any).autoTable({
-    head: [opexBreakdown[0]],
-    body: opexBreakdown.slice(1),
-    startY: yPosition,
-    margin: { left: 20, right: 20 },
-    theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 0 },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-  });
+  addSimpleTable(opexBreakdown[0] as string[], opexBreakdown.slice(1) as (string | number)[][]);
 
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
-
-  // ===== CASH FLOW TABLE =====
-  checkPageBreak(80);
-  addSection("DETAILED CASH FLOW ANALYSIS (25-YEAR PROJECT LIFE)");
+  // ===== CASH FLOW TABLE (simplified - show every 5 years) =====
+  checkPageBreak(60);
+  addSection("CASH FLOW SUMMARY (5-YEAR INTERVALS)");
 
   const cashFlowTableData = [
-    ["Year", "Gen (MWh)", "OPEX (GBP)", "Revenue (GBP)", "Nom. CF (GBP)", "Disc. CF (GBP)", "Cum. DCF (GBP)"],
-    ...results.yearlyData.map((year) => [
-      year.year.toString(),
-      formatNumberWithCommas(year.generation.toFixed(0)),
-      formatCurrency(year.opex),
-      formatCurrency(year.revenue),
-      formatCurrency(year.cashFlow),
-      formatCurrency(year.discountedCashFlow),
-      formatCurrency(year.cumulativeDiscountedCashFlow),
-    ]),
+    ["Year", "Gen (MWh)", "OPEX (GBP)", "Revenue (GBP)", "Disc. CF (GBP)"],
+    ...results.yearlyData
+      .filter((_, i) => i === 0 || i % 5 === 0 || i === results.yearlyData.length - 1)
+      .map((year) => [
+        year.year.toString(),
+        formatNumberWithCommas(year.generation.toFixed(0)),
+        formatCurrency(year.opex),
+        formatCurrency(year.revenue),
+        formatCurrency(year.discountedCashFlow),
+      ]),
   ];
 
-  (doc as any).autoTable({
-    head: [cashFlowTableData[0]],
-    body: cashFlowTableData.slice(1),
-    startY: yPosition,
-    margin: { left: 20, right: 20 },
-    theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { fontSize: 8, textColor: 0 },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-  });
-
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  addSimpleTable(cashFlowTableData[0] as string[], cashFlowTableData.slice(1) as (string | number)[][], [15, 20, 20, 25, 25]);
 
   // ===== DATA SOURCES =====
   checkPageBreak(60);
