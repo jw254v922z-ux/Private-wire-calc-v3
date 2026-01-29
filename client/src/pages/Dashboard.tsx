@@ -866,47 +866,16 @@ export default function Dashboard() {
           <DialogHeader>
             <DialogTitle>Source Information</DialogTitle>
           </DialogHeader>
-          <div className="text-sm space-y-2">
-            {showSourceInfo === 'gridCost' && (
+          <div className="text-sm space-y-3">
+            {showSourceInfo && (
               <>
-                <p><strong>Grid Connection Costs</strong></p>
-                <p>Based on SSEN Distribution cost estimates (2025) for typical private wire infrastructure including cable, transformers, and wayleave.</p>
-                <p className="text-xs text-gray-500">Actual costs vary by location, voltage, and site conditions.</p>
-              </>
-            )}
-            {showSourceInfo === 'cable' && (
-              <>
-                <p><strong>Cable Costs</strong></p>
-                <p>Based on current market pricing for underground and overhead cable installation in the UK.</p>
-                <p className="text-xs text-gray-500">Includes trenching, laying, and termination.</p>
-              </>
-            )}
-            {showSourceInfo === 'transformer' && (
-              <>
-                <p><strong>Transformer Costs</strong></p>
-                <p>Based on manufacturer quotes for oil-immersed distribution transformers.</p>
-                <p className="text-xs text-gray-500">Includes installation and commissioning.</p>
-              </>
-            )}
-            {showSourceInfo === 'wayleave' && (
-              <>
-                <p><strong>Wayleave Costs</strong></p>
-                <p>Annual wayleave charges for crossing third-party land, based on typical UK rates.</p>
-                <p className="text-xs text-gray-500">Subject to negotiation and site-specific conditions.</p>
-              </>
-            )}
-            {showSourceInfo === 'infrastructure' && (
-              <>
-                <p><strong>Infrastructure Costs</strong></p>
-                <p>Transformers, joint bays, directional drilling for road crossings.</p>
-                <p>Based on manufacturer quotes and contractor benchmarks (2026).</p>
-              </>
-            )}
-            {showSourceInfo === 'cable' && (
-              <>
-                <p><strong>Cable Costs</strong></p>
-                <p>UK market pricing for underground/overhead cable installation.</p>
-                <p>Includes trenching, laying, termination, reinstatement.</p>
+                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <p className="font-semibold text-blue-900">{showSourceInfo}</p>
+                </div>
+                <div className="space-y-2 text-gray-700">
+                  <p>This cost component is based on industry standards and market benchmarks for UK private wire infrastructure projects.</p>
+                  <p className="text-xs text-gray-500 italic">Note: Actual costs vary significantly by location, site conditions, and current market rates. Always obtain detailed quotes from contractors and DNOs for your specific project.</p>
+                </div>
               </>
             )}
           </div>
