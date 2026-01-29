@@ -318,19 +318,19 @@ export function GridConnectionSliders({ onCostsUpdate, setShowSourceInfo }: Grid
                 label="Cable (Trenching + Installation)"
                 min={costs.cableCost.min}
                 max={costs.cableCost.max}
-                source="SSEN Charging Statements 2024-25"
+                source="cable-ssen"
               />
               <CostSummaryCard
                 label="Joint Bays"
                 min={costs.jointBayCost.min}
                 max={costs.jointBayCost.max}
-                source="UK Civil Works Standards"
+                source="joint-bay-standards"
               />
               <CostSummaryCard
                 label="Road Crossings (Directional Drill)"
                 min={costs.roadCrossingCost.min}
                 max={costs.roadCrossingCost.max}
-                source="SSEN Charging Statements"
+                source="directional-drill"
               />
             </div>
 
@@ -340,33 +340,33 @@ export function GridConnectionSliders({ onCostsUpdate, setShowSourceInfo }: Grid
                 label={`Step-Up Transformers (0.4 → ${cableVoltage} kV) x${stepUpTransformerCount}`}
                 min={costs.stepUpCost.min}
                 max={costs.stepUpCost.max}
-                source="Market Norms"
+                source="transformer-market"
               />
               <CostSummaryCard
                 label={`Step-Down Transformers (${cableVoltage} → ${stepDownVoltage} kV) x${stepDownTransformerCount}`}
                 min={costs.stepDownCost.min}
                 max={costs.stepDownCost.max}
-                source="Market Norms"
+                source="transformer-market"
               />
               {includeStepDownInstallation && (
                 <CostSummaryCard
                   label={`Step-Down Installation (Civil + Connections) x${stepDownTransformerCount}`}
                   min={costs.stepDownInstallationCost.min}
                   max={costs.stepDownInstallationCost.max}
-                  source="HV/LV Substation Standards"
+                  source="termination-ssen"
                 />
               )}
               <CostSummaryCard
                 label="Cable Terminations"
                 min={costs.terminationCost.min}
                 max={costs.terminationCost.max}
-                source="SSEN Charging Statements"
+                source="directional-drill"
               />
               <CostSummaryCard
                 label={`HV Terminations at End-User Sites x${stepDownTransformerCount}`}
                 min={costs.hvTerminationCost.min}
                 max={costs.hvTerminationCost.max}
-                source="SSEN Charging Statements"
+                source="directional-drill"
               />
             </div>
 
@@ -376,13 +376,13 @@ export function GridConnectionSliders({ onCostsUpdate, setShowSourceInfo }: Grid
                 label="Annual Wayleaves (Agricultural Land)"
                 min={costs.wayleavesCost.min}
                 max={costs.wayleavesCost.max}
-                source="ENA Wayleave Rates 2024-25"
+                source="wayleave-ena"
               />
               <CostSummaryCard
                 label="Land Rights & Planning"
                 min={costs.landRightsCost.min}
                 max={costs.landRightsCost.max}
-                source="SSEN Land Rights Guidance"
+                source="land-rights-ssen"
               />
             </div>
 

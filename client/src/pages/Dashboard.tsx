@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { calculateSolarModel, defaultInputs, SolarInputs, SolarResults } from "@/lib/calculator";
+import { getSourceDetails } from '@/lib/sources';
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
 import { AlertCircle, Info, BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
@@ -862,25 +863,59 @@ export default function Dashboard() {
 
       {/* Source Info Modal */}
       <Dialog open={!!showSourceInfo} onOpenChange={() => setShowSourceInfo(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Source Information</DialogTitle>
           </DialogHeader>
-          <div className="text-sm space-y-3">
-            {showSourceInfo && (
-              <>
-                <div className="bg-blue-50 border border-blue-200 rounded p-3">
-                  <p className="font-semibold text-blue-900">{showSourceInfo}</p>
-                </div>
-                <div className="space-y-2 text-gray-700">
-                  <p>This cost component is based on industry standards and market benchmarks for UK private wire infrastructure projects.</p>
-                  <p className="text-xs text-gray-500 italic">Note: Actual costs vary significantly by location, site conditions, and current market rates. Always obtain detailed quotes from contractors and DNOs for your specific project.</p>
-                </div>
-              </>
-            )}
+          <div className="text-sm space-y-4">
+            {showSourceInfo && (() => {
+              const source = getSourceDetails(showSourceInfo);
+              if (!source) {
+                return <p className="text-gray-500">Source information not available</p>;
+              }
+              return (
+                <>
+                  <div className="bg-blue-50 border border-blue-200 rounded p-4">
+                    <p className="font-bold text-blue-900">{source.title}</p>
+                    <p className="text-sm text-blue-800 mt-1">{source.organization} ({source.year})</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Description</h4>
+                      <p className="text-gray-700">{source.description}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Methodology</h4>
+                      <p className="text-gray-700">{source.methodology}</p>
+                    </div>
+                    
+                    {source.link && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Reference Link</h4>
+                        <a href={source.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline break-all">
+                          {source.link}
+                        </a>
+                      </div>
+                    )}
+                    
+                    <div className="bg-gray-50 p-3 rounded">
+                      <p className="text-xs text-gray-600">
+                        <strong>Confidence Level:</strong> {source.confidence.charAt(0).toUpperCase() + source.confidence.slice(1)}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        <strong>Last Updated:</strong> {source.lastUpdated}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </DialogContent>
       </Dialog>
+
 
       {/* Disclaimer Modal */}
       <Dialog open={showDisclaimerModal} onOpenChange={setShowDisclaimerModal}>

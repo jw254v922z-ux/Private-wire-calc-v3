@@ -270,5 +270,50 @@ export function generatePDFReport(options: PDFReportOptions) {
   }
 
   // Download PDF
+  
+  // Add Sources Page
+  doc.addPage();
+  doc.setFontSize(16);
+  doc.text('Data Sources & Methodology', 20, 20);
+  
+  doc.setFontSize(10);
+  let yPos = 35;
+  
+  const sources = [
+    { title: 'Cable Costs', source: 'SSEN Distribution Charging Statements 2024-25', link: 'https://www.ssen.co.uk/Business/Charges/' },
+    { title: 'Joint Bays & Infrastructure', source: 'ENA Engineering Recommendation G81/1', link: 'https://www.energynetworks.org/' },
+    { title: 'Transformers', source: 'ABB, Siemens, Schneider Electric Market Benchmarks (2025)', link: 'https://www.abb.com/' },
+    { title: 'Directional Drilling', source: 'SSEN Charging Statements 2024-25', link: 'https://www.ssen.co.uk/' },
+    { title: 'Wayleave Rates', source: 'ENA Wayleave Rates 2024-25', link: 'https://www.energynetworks.org/' },
+    { title: 'Panel Degradation', source: 'IEC 61215 Standard (2021)', link: 'https://www.iec.ch/' },
+    { title: 'Solar Irradiance', source: 'PVGIS - European Commission', link: 'https://pvgis.ec.europa.eu/' },
+    { title: 'Discount Rate', source: 'HM Treasury Green Book', link: 'https://www.gov.uk/government/publications/green-book-appraisal-and-evaluation' },
+  ];
+  
+  sources.forEach((item, idx) => {
+    if (yPos > 270) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFont(undefined as any, 'bold');
+    doc.text(`${idx + 1}. ${item.title}`, 20, yPos);
+    yPos += 6;
+    
+    doc.setFont(undefined as any, 'normal');
+    doc.setFontSize(9);
+    doc.text(`Source: ${item.source}`, 25, yPos);
+    yPos += 5;
+    doc.text(`Link: ${item.link}`, 25, yPos);
+    yPos += 8;
+    doc.setFontSize(10);
+  });
+  
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text('All sources current as of January 2026. Actual costs may vary by location and market conditions.', 20, 280);
+  doc.setTextColor(0, 0, 0);
+
+
   doc.save(`${projectName}-solar-report.pdf`);
 }
