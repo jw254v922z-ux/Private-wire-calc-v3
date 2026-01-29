@@ -108,6 +108,7 @@ export default function Dashboard() {
         percentConsumptionExport: model.percentConsumptionExport || 0,
         exportPrice: model.exportPrice || 50,
         offsetableEnergyCost: model.offsetableEnergyCost || 120,
+        offsetableEnergyCPI: 2.5,
         gridCostOverrideEnabled: false,
         gridCostOverride: 0,
       });
@@ -891,6 +892,20 @@ export default function Dashboard() {
                 <p><strong>Wayleave Costs</strong></p>
                 <p>Annual wayleave charges for crossing third-party land, based on typical UK rates.</p>
                 <p className="text-xs text-gray-500">Subject to negotiation and site-specific conditions.</p>
+              </>
+            )}
+            {showSourceInfo === 'infrastructure' && (
+              <>
+                <p><strong>Infrastructure Costs</strong></p>
+                <p>Transformers, joint bays, directional drilling for road crossings.</p>
+                <p>Based on manufacturer quotes and contractor benchmarks (2026).</p>
+              </>
+            )}
+            {showSourceInfo === 'cable' && (
+              <>
+                <p><strong>Cable Costs</strong></p>
+                <p>UK market pricing for underground/overhead cable installation.</p>
+                <p>Includes trenching, laying, termination, reinstatement.</p>
               </>
             )}
           </div>

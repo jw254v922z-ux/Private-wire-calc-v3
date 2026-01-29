@@ -22,6 +22,7 @@ export interface SolarInputs {
   percentConsumptionExport: number; // % of generation exported at export price
   exportPrice: number; // £/MWh for exported power
   offsetableEnergyCost: number; // £/MWh - counterfactual cost of energy without solar (for savings calc)
+  offsetableEnergyCPI: number; // % annual CPI escalation for offsetable energy cost
   gridCostOverrideEnabled: boolean; // Enable/disable grid cost overrides
   gridCostOverride: number; // Custom total grid connection cost (£) when override enabled
 }
@@ -222,7 +223,7 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
       irr,
       paybackPeriod,
       capexPerMW: totalCapex / inputs.mw,
-      annualSavings: (totalEnergy / inputs.projectLife) * inputs.powerPrice, // Average annual generation * PPA price
+      annualSavings: (totalEnergy / inputs.projectLife) * inputs.offsetableEnergyCost, // Average annual generation * offsetable energy cost
     }
   };
 }
@@ -254,6 +255,7 @@ export const defaultInputs: SolarInputs = {
   percentConsumptionExport: 0, // 0% exported by default
   exportPrice: 50, // Export price typically lower than PPA price
   offsetableEnergyCost: 120, // Counterfactual cost of energy without solar (for savings calculation)
+  offsetableEnergyCPI: 2.5, // Annual CPI escalation for offsetable energy cost (%)
   gridCostOverrideEnabled: false,
   gridCostOverride: 0,
 };

@@ -114,18 +114,34 @@ export function GridConnectionCostBreakdown({ costs, onUpdate, setShowSourceInfo
   const CollapsibleSection = ({ 
     title, 
     sectionKey, 
-    children 
+    children,
+    sourceKey
   }: { 
     title: string; 
     sectionKey: string; 
     children: React.ReactNode;
+    sourceKey?: string;
   }) => (
     <div className="border rounded-lg">
       <button
         onClick={() => toggleSection(sectionKey)}
         className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
       >
-        <h3 className="font-semibold text-slate-900">{title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-slate-900">{title}</h3>
+          {sourceKey && setShowSourceInfo && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSourceInfo(sourceKey);
+              }}
+              className="text-blue-500 hover:text-blue-700 p-0.5"
+              title="View source information"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         {expandedSections[sectionKey] ? (
           <ChevronUp className="w-4 h-4" />
         ) : (
@@ -173,7 +189,7 @@ export function GridConnectionCostBreakdown({ costs, onUpdate, setShowSourceInfo
             </CollapsibleSection>
 
             {/* Infrastructure Section */}
-            <CollapsibleSection title="Infrastructure & Equipment" sectionKey="infrastructure">
+            <CollapsibleSection title="Infrastructure & Equipment" sectionKey="infrastructure" sourceKey="infrastructure">
               <CostItemInput
                 label="Major Road Crossings (2)"
                 minKey="majorRoadCrossingsMin"
@@ -195,7 +211,7 @@ export function GridConnectionCostBreakdown({ costs, onUpdate, setShowSourceInfo
             </CollapsibleSection>
 
             {/* Land Rights Section */}
-            <CollapsibleSection title="Land Rights" sectionKey="landRights">
+            <CollapsibleSection title="Land Rights" sectionKey="landRights" sourceKey="wayleave">
               <CostItemInput
                 label="Land Rights - Compensation"
                 minKey="landRightsCompensationMin"

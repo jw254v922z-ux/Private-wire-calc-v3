@@ -24,17 +24,21 @@
 - [ ] Account for road cable laying costs (traffic management, trenching, reinstatement)
 
 ### Phase 4: Grid Cost Management and Overrides
-- [ ] Add ability to override ALL grid cost assumptions
-- [ ] Create override UI for grid connection costs
-- [ ] Implement info icons with source documentation for all researched costs
-- [ ] Store override values in session/model
+- [x] Add ability to override ALL grid cost assumptions
+- [x] Create override UI for grid connection costs
+- [ ] Fix info icons to show sources for all researched costs (cable, transformer, wayleave)
+- [x] Store override values in session/model
 
 ### Phase 5: Sensitivity Analysis and Reporting
-- [ ] Add LCOE sensitivity heatmap (cable voltage vs distance)
-- [ ] Show cash flow table for entire project lifespan on Cash Flow tab
-- [ ] Include discounted cash flow column in table
-- [ ] Create summary report download with all sources and assumptions
-- [ ] Export report as PDF with cost breakdowns and disclaimers
+- [x] Add LCOE sensitivity heatmap (cable voltage vs distance)
+- [x] Show cash flow table for entire project lifespan on Cash Flow tab
+- [x] Include discounted cash flow column in table
+- [x] Create summary report download with all sources and assumptions
+- [x] Export report as PDF with cost breakdowns and disclaimers
+- [x] Fix offsetable energy cost to affect annual savings calculation
+- [x] Add CPI escalation to offsetable energy cost (field added, ready for UI)
+- [ ] Add IRR sensitivity analysis (showing how IRR changes with cable voltage/distance)
+- [ ] Ensure current scenario in sensitivity analysis matches Private Wire Parameters tab
 
 ### Phase 6: Data Upload and Profile Management
 - [ ] Add ability to upload HH (half-hourly) profile for demand
