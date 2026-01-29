@@ -10,6 +10,7 @@ import { calculateGridConnectionCost } from "@/lib/gridConnectionCosts";
 
 interface GridConnectionSliderProps {
   onCostsUpdate: (costs: GridConnectionCosts) => void;
+  setShowSourceInfo?: (key: string) => void;
 }
 
 export interface GridConnectionCosts {
@@ -50,7 +51,7 @@ export interface GridConnectionCosts {
 const CABLE_VOLTAGE_OPTIONS = ["6", "11", "33", "66", "132"];
 const STEPDOWN_VOLTAGE_OPTIONS = ["0.4", "6.6", "11"];
 
-export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderProps) {
+export function GridConnectionSliders({ onCostsUpdate, setShowSourceInfo }: GridConnectionSliderProps) {
   const [distance, setDistance] = useState(3);
   const [cableVoltage, setCableVoltage] = useState("33");
   const [stepDownVoltage, setStepDownVoltage] = useState("11");
@@ -122,10 +123,14 @@ export function GridConnectionSliders({ onCostsUpdate }: GridConnectionSliderPro
             Average: {formatCurrency((min + max) / 2)}
           </p>
         </div>
-        {source && (
-          <div className="ml-2 flex-shrink-0" title={source}>
-            <Info className="w-4 h-4 text-slate-400" />
-          </div>
+        {source && setShowSourceInfo && (
+          <button
+            onClick={() => setShowSourceInfo(source)}
+            className="ml-2 flex-shrink-0 text-blue-500 hover:text-blue-700 p-0.5"
+            title="View source information"
+          >
+            <Info className="w-4 h-4" />
+          </button>
         )}
       </div>
     </div>

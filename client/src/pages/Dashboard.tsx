@@ -844,6 +844,7 @@ export default function Dashboard() {
                     // Also update Private Wire Cost with grid connection estimate
                     handleInputChange("privateWireCost", Math.round(avgCost));
                   }}
+                  setShowSourceInfo={setShowSourceInfo}
                 />
               </TabsContent>
               
