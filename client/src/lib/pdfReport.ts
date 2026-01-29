@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { SolarInputs, SolarResults } from "./calculator";
 import { formatCurrency, formatNumberWithCommas } from "./formatters";
 
@@ -11,7 +11,7 @@ interface PDFReportOptions {
   generatedDate?: Date;
 }
 
-export async function generatePDFReport(options: PDFReportOptions) {
+export function generatePDFReport(options: PDFReportOptions) {
   const {
     inputs,
     results,
@@ -21,6 +21,8 @@ export async function generatePDFReport(options: PDFReportOptions) {
   } = options;
 
   const doc = new jsPDF();
+  (doc as any).autoTable = autoTable;
+  
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   let yPosition = 20;
