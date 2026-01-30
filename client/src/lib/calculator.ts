@@ -72,6 +72,11 @@ function calculateIRR(cashFlows: number[], guess = 0.1): number {
   const precision = 1e-7;
   let rate = guess;
 
+  // Debug: log cash flows
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[DEBUG] IRR cashFlows:', cashFlows);
+  }
+
   for (let i = 0; i < maxIterations; i++) {
     let npv = 0;
     let dNpv = 0;
@@ -84,9 +89,15 @@ function calculateIRR(cashFlows: number[], guess = 0.1): number {
 
     const newRate = rate - npv / dNpv;
     if (Math.abs(newRate - rate) < precision) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DEBUG] IRR calculated:', newRate, 'as percentage:', (newRate * 100).toFixed(2) + '%');
+      }
       return newRate;
     }
     rate = newRate;
+  }
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[DEBUG] IRR max iterations reached:', rate, 'as percentage:', (rate * 100).toFixed(2) + '%');
   }
   return rate;
 }

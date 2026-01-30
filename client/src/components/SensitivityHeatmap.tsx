@@ -32,7 +32,26 @@ export function SensitivityHeatmap({
   }
   
   if (currentInputs?.distanceKm) {
-    const distanceIdx = matrix.distances.indexOf(currentInputs.distanceKm);
+    // Find exact match first
+    let distanceIdx = matrix.distances.indexOf(currentInputs.distanceKm);
+    
+    // If no exact match, find the closest distance
+    if (distanceIdx < 0) {
+      let closestDistance = matrix.distances[0];
+      let closestIdx = 0;
+      let minDiff = Math.abs(currentInputs.distanceKm - closestDistance);
+      
+      for (let i = 1; i < matrix.distances.length; i++) {
+        const diff = Math.abs(currentInputs.distanceKm - matrix.distances[i]);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestDistance = matrix.distances[i];
+          closestIdx = i;
+        }
+      }
+      distanceIdx = closestIdx;
+    }
+    
     if (distanceIdx >= 0) currentDistanceIdx = distanceIdx;
   }
 
@@ -87,7 +106,7 @@ export function SensitivityHeatmap({
                   
                   const displayValue = metric === "lcoe" 
                     ? `£${value.toFixed(0)}`
-                    : `${value.toFixed(1)}%`;
+                    : `${(value * 100).toFixed(1)}%`;
 
                   return (
                     <div

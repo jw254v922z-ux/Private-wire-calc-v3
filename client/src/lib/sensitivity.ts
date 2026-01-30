@@ -86,6 +86,11 @@ export function calculateSensitivityMatrix(baseInputs: SolarInputs): Sensitivity
       const lcoe = results.summary.lcoe;
       const irr = results.summary.irr;
 
+      // Debug: log first few values
+      if (distance === 1 && voltage === 6) {
+        console.log('[DEBUG SENSITIVITY] First cell (6kV, 1km):', { lcoe, irr, irrPercent: (irr * 100).toFixed(2) });
+      }
+
       lcoeRow.push(lcoe);
       irrRow.push(irr);
       minLcoe = Math.min(minLcoe, lcoe);
@@ -97,6 +102,8 @@ export function calculateSensitivityMatrix(baseInputs: SolarInputs): Sensitivity
     lcoeData.push(lcoeRow);
     irrData.push(irrRow);
   }
+
+  console.log('[DEBUG SENSITIVITY] Matrix minIrr:', minIrr, 'maxIrr:', maxIrr, 'minIrr%:', (minIrr * 100).toFixed(2), 'maxIrr%:', (maxIrr * 100).toFixed(2));
 
   return {
     voltages: VOLTAGES,

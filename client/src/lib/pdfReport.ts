@@ -340,7 +340,7 @@ export function generatePDFReport(options: PDFReportOptions) {
     ['Worst Case', '132 kV', '10 km', '£185/MWh'],
   ];
   
-  let yPos2 = 65;
+  let yPosSensitivity = 65;
   lcoeTable.forEach((row, idx) => {
     if (idx === 0) {
       doc.setFont(undefined as any, 'bold');
@@ -354,23 +354,23 @@ export function generatePDFReport(options: PDFReportOptions) {
       }
     }
     
-    doc.text(row[0], 25, yPos2);
-    doc.text(row[1], 70, yPos2);
-    doc.text(row[2], 110, yPos2);
-    doc.text(row[3], 140, yPos2);
-    yPos2 += 8;
+    doc.text(row[0], 25, yPosSensitivity);
+    doc.text(row[1], 70, yPosSensitivity);
+    doc.text(row[2], 110, yPosSensitivity);
+    doc.text(row[3], 140, yPosSensitivity);
+    yPosSensitivity += 8;
   });
   
-  yPos2 += 5;
+  yPosSensitivity += 5;
   
   // Add IRR sensitivity summary
   doc.setFont(undefined as any, 'bold');
   doc.setFontSize(12);
-  doc.text('IRR Sensitivity (%)', 20, yPos2);
+  doc.text('IRR Sensitivity (%)', 20, yPosSensitivity);
   
   doc.setFont(undefined as any, 'normal');
   doc.setFontSize(10);
-  yPos2 += 12;
+  yPosSensitivity += 12;
   
   const irrTable = [
     ['Scenario', 'Cable Voltage', 'Distance', 'IRR'],
@@ -392,20 +392,20 @@ export function generatePDFReport(options: PDFReportOptions) {
       }
     }
     
-    doc.text(row[0], 25, yPos2);
-    doc.text(row[1], 70, yPos2);
-    doc.text(row[2], 110, yPos2);
-    doc.text(row[3], 140, yPos2);
-    yPos2 += 8;
+    doc.text(row[0], 25, yPosSensitivity);
+    doc.text(row[1], 70, yPosSensitivity);
+    doc.text(row[2], 110, yPosSensitivity);
+    doc.text(row[3], 140, yPosSensitivity);
+    yPosSensitivity += 8;
   });
   
   doc.setFillColor(255, 255, 255);
   doc.setFont(undefined as any, 'normal');
   doc.setFontSize(9);
   doc.setTextColor(100, 100, 100);
-  yPos2 += 10;
-  doc.text('Note: Sensitivity analysis shows how project economics change with different grid connection parameters.', 20, yPos2);
-  doc.text('Lower voltages and shorter distances generally improve project returns and reduce costs.', 20, yPos2 + 6);
+  yPosSensitivity += 10;
+  doc.text('Note: Sensitivity analysis shows how project economics change with different grid connection parameters.', 20, yPosSensitivity);
+  doc.text('Lower voltages and shorter distances generally improve project returns and reduce costs.', 20, yPosSensitivity + 6);
 
 
   doc.save(`${projectName}-solar-report.pdf`);
