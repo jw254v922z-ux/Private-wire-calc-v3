@@ -10,7 +10,7 @@ import { calculateSolarModel, defaultInputs, SolarInputs, SolarResults } from "@
 import { getSourceDetails } from '@/lib/sources';
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatNumberWithCommas } from "@/lib/formatters";
-import { AlertCircle, Info, BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut } from "lucide-react";
+import { AlertCircle, Info, BatteryCharging, Coins, Download, Factory, Save, Trash2, Zap, LogOut, Leaf, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MetricCard } from "../components/MetricCard";
@@ -320,10 +320,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Project Info Row */}
+          {/* Project Details Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
             <MetricCard 
-              title="Project Info" 
+              title="Total CAPEX" 
               value={formatCurrency(results.summary.totalCapex)} 
               icon={Factory}
               className="bg-white/5 border-l-orange-400 text-white border-white/10 backdrop-blur-sm"
@@ -354,14 +354,36 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Offtaker Key Info Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
-            <MetricCard 
-              title="Annual Savings" 
-              value={formatCurrency(results.summary.annualSavings) + "/year"} 
-              icon={Zap}
-              className="bg-white/5 border-l-green-400 text-white border-white/10 backdrop-blur-sm"
-            />
+          {/* Offtaker Banner */}
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-gray-400 mb-3">Offtaker</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+              <MetricCard 
+                title="Annual Savings" 
+                value={formatCurrency(results.summary.annualSavings) + "/year"} 
+                icon={Zap}
+                className="bg-white/5 border-l-green-400 text-white border-white/10 backdrop-blur-sm"
+              />
+            </div>
+          </div>
+
+          {/* Landowner Banner */}
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-gray-400 mb-3">Landowner</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+              <MetricCard 
+                title="Total Yearly Land Options Income" 
+                value={formatCurrency(results.summary.totalLandOptionIncome)} 
+                icon={Leaf}
+                className="bg-white/5 border-l-green-500 text-white border-white/10 backdrop-blur-sm"
+              />
+              <MetricCard 
+                title="Land Option Yield" 
+                value={results.summary.landOptionYield.toFixed(2) + "%"} 
+                icon={TrendingUp}
+                className="bg-white/5 border-l-emerald-400 text-white border-white/10 backdrop-blur-sm"
+              />
+            </div>
           </div>
         </div>
       </div>

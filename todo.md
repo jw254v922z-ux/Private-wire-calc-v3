@@ -80,10 +80,9 @@
 
 
 ### Phase 8: Landing Page Reorganization and Landowner Page
-- [x] Rename "Total CAPEX" section heading to "Project Info"
-- [x] Create "Offtaker Key Info" section with Annual Savings metric
-- [x] Move Annual Savings from main metrics to Offtaker Key Info section
-- [x] Create new "Landowner" page/tab with land option income and yield metrics
-- [x] Add "Total Yearly Land Options Income" metric to Landowner page
-- [x] Add "Land Option Yield" metric to Landowner page
-- [x] Calculate land option yield based on annual income vs. project parameters
+- [x] Rename section heading to "Project Details" (keeping Total CAPEX, LCOE, IRR, Payback Period, Total NPV)
+- [x] Remove Annual Savings from Project Details section
+- [x] Create new "Offtaker" section with Annual Savings metric card
+- [x] Create new "Landowner" section with Total Yearly Land Options Income and Land Option Yield metric cards
+- [x] Keep "Landowner" tab in tabs area for detailed analysis
+- [x] Verify three separate metric sections display correctly on landing page
