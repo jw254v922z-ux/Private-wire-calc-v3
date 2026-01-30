@@ -77,3 +77,13 @@
 - [x] Rename Degradation label to Panel Degradation (%)
 - [x] Add Irradiance Override (kWh/m²/year) input field
 - [x] Update generation calculation to use custom irradiance if provided (field added, awaiting implementation)
+
+
+### Phase 8: Landing Page Reorganization and Landowner Page
+- [x] Rename "Total CAPEX" section heading to "Project Info"
+- [x] Create "Offtaker Key Info" section with Annual Savings metric
+- [x] Move Annual Savings from main metrics to Offtaker Key Info section
+- [x] Create new "Landowner" page/tab with land option income and yield metrics
+- [x] Add "Total Yearly Land Options Income" metric to Landowner page
+- [x] Add "Land Option Yield" metric to Landowner page
+- [x] Calculate land option yield based on annual income vs. project parameters

@@ -63,6 +63,8 @@ export interface SolarResults {
     paybackPeriod: number;
     capexPerMW: number;
     annualSavings: number;
+    totalLandOptionIncome: number;
+    landOptionYield: number;
   };
 }
 
@@ -219,6 +221,16 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
     paybackPeriod = inputs.projectLife + 1; // Never pays back
   }
 
+  // Calculate total land option income
+  let totalLandOptionIncome = 0;
+  for (let year = 1; year <= inputs.projectLife; year++) {
+    const landOptionCost = landOptionCostYear1 * Math.pow(1 + inputs.costInflationRate / 100, year - 1);
+    totalLandOptionIncome += landOptionCost;
+  }
+
+  // Calculate land option yield (annual income as % of total project value)
+  const landOptionYield = totalCapex > 0 ? (landOptionCostYear1 / totalCapex) * 100 : 0;
+
   return {
     yearlyData,
     summary: {
@@ -237,6 +249,8 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
       paybackPeriod,
       capexPerMW: totalCapex / inputs.mw,
       annualSavings: (totalEnergy / inputs.projectLife) * inputs.offsetableEnergyCost, // Average annual generation * offsetable energy cost
+      totalLandOptionIncome,
+      landOptionYield,
     }
   };
 }

@@ -18,6 +18,7 @@ import { GridConnectionCostBreakdown } from "../components/GridConnectionCostBre
 import { GridConnectionSliders, type GridConnectionCosts } from "../components/GridConnectionSliders";
 import { SensitivityHeatmap } from "../components/SensitivityHeatmap";
 import { CashFlowTable } from "../components/CashFlowTable";
+import LandownerPage from "./Landowner";
 import { calculateSensitivityMatrix } from "@/lib/sensitivity";
 import { generatePDFReport } from "@/lib/pdfReport";
 import { trpc } from "@/lib/trpc";
@@ -319,10 +320,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Key Metrics Row */}
+          {/* Project Info Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
             <MetricCard 
-              title="Total CAPEX" 
+              title="Project Info" 
               value={formatCurrency(results.summary.totalCapex)} 
               icon={Factory}
               className="bg-white/5 border-l-orange-400 text-white border-white/10 backdrop-blur-sm"
@@ -351,6 +352,10 @@ export default function Dashboard() {
               icon={Factory}
               className="bg-white/5 border-l-purple-400 text-white border-white/10 backdrop-blur-sm"
             />
+          </div>
+
+          {/* Offtaker Key Info Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
             <MetricCard 
               title="Annual Savings" 
               value={formatCurrency(results.summary.annualSavings) + "/year"} 
@@ -773,12 +778,13 @@ export default function Dashboard() {
           <div className="lg:col-span-8 space-y-6">
             
             <Tabs defaultValue="gridcosts" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 mb-4">
+              <TabsList className="grid w-full grid-cols-6 mb-4">
                 <TabsTrigger value="gridcosts">Private Wire Parameters</TabsTrigger>
                 <TabsTrigger value="cashflow">Cash Flow Analysis</TabsTrigger>
                 <TabsTrigger value="cumulative">Cumulative Returns</TabsTrigger>
                 <TabsTrigger value="generation">Generation & Revenue</TabsTrigger>
                 <TabsTrigger value="sensitivity">Sensitivity Analysis</TabsTrigger>
+                <TabsTrigger value="landowner">Landowner</TabsTrigger>
               </TabsList>
               
               <TabsContent value="cashflow">
@@ -864,6 +870,10 @@ export default function Dashboard() {
                     metric="irr"
                   />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="landowner">
+                <LandownerPage results={results} />
               </TabsContent>
             </Tabs>
 
