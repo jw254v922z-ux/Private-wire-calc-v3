@@ -92,3 +92,10 @@
 - [x] Enable land option by default in calculator (£5,000/MW/year)
 - [x] Verify land option is properly included in OPEX calculation
 - [x] Test land option metrics calculate correctly (Total Yearly Land Options Income and Land Option Yield)
+
+
+### Phase 10: Land Rental Terminology Update
+- [x] Rename "Land Option Cost" to "Land Rental Cost" in parameters
+- [x] Rename "Land Option Income" to "Land Rental Income" in metrics
+- [x] Rename "Land Option Yield" to "Land Rental Yield" in metrics
+- [x] Update checkbox label to "Include Land Rental Cost in OPEX"

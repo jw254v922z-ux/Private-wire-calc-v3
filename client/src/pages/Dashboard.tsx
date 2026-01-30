@@ -371,18 +371,18 @@ export default function Dashboard() {
           <div className="mt-4">
             <h3 className="text-sm font-semibold text-gray-400 mb-3">Landowner</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-              <MetricCard 
-                title="Total Yearly Land Options Income" 
-                value={formatCurrency(results.summary.totalLandOptionIncome)} 
-                icon={Leaf}
-                className="bg-white/5 border-l-green-500 text-white border-white/10 backdrop-blur-sm"
-              />
-              <MetricCard 
-                title="Land Option Yield" 
-                value={results.summary.landOptionYield.toFixed(2) + "%"} 
-                icon={TrendingUp}
-                className="bg-white/5 border-l-emerald-400 text-white border-white/10 backdrop-blur-sm"
-              />
+            <MetricCard 
+              title="Land Rental Income" 
+              value={formatCurrency(results.summary.totalLandOptionIncome)} 
+              icon={Leaf}
+              className="bg-white/5 border-l-green-500 text-white border-white/10 backdrop-blur-sm"
+            />
+            <MetricCard 
+              title="Land Rental Yield" 
+              value={results.summary.landOptionYield.toFixed(2) + "%"} 
+              icon={TrendingUp}
+              className="bg-white/5 border-l-emerald-400 text-white border-white/10 backdrop-blur-sm"
+            />
             </div>
           </div>
         </div>
@@ -556,7 +556,7 @@ export default function Dashboard() {
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <Label>Land Option Cost per MW/year (£)</Label>
+                      <Label>Land Rental Cost per MW/year (£)</Label>
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.landOptionCostPerMWYear)}</span>
                     </div>
                     <Input 
@@ -575,14 +575,14 @@ export default function Dashboard() {
                         onChange={(e) => handleInputChange("landOptionEnabled", e.target.checked)}
                         className="w-4 h-4 rounded border-gray-300"
                       />
-                      <Label htmlFor="landOptionEnabled" className="cursor-pointer">Include Land Option Cost in OPEX</Label>
+                      <Label htmlFor="landOptionEnabled" className="cursor-pointer">Include Land Rental Cost in OPEX</Label>
                     </div>
                   </div>
 
                   {inputs.landOptionEnabled && (
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <Label>Land Option Discount (%)</Label>
+                        <Label>Land Rental Discount (%)</Label>
                         <span className="text-sm font-mono">{inputs.landOptionDiscount.toFixed(1)}%</span>
                       </div>
                       <Slider 
