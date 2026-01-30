@@ -99,3 +99,10 @@
 - [x] Rename "Land Option Income" to "Land Rental Income" in metrics
 - [x] Rename "Land Option Yield" to "Land Rental Yield" in metrics
 - [x] Update checkbox label to "Include Land Rental Cost in OPEX"
+
+
+### Phase 11: Offtaker and Landowner Metric Updates
+- [x] Add yearly savings and total savings calculations to calculator
+- [x] Add yearly rental income calculation to calculator
+- [x] Update Offtaker banner to show Yearly Savings and Total Savings
+- [x] Update Landowner banner to show Yearly Rental Income and Total Rental Income

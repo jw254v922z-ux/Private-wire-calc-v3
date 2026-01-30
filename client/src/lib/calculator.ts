@@ -63,6 +63,9 @@ export interface SolarResults {
     paybackPeriod: number;
     capexPerMW: number;
     annualSavings: number;
+    yearlySavings: number;
+    totalSavings: number;
+    yearlyRentalIncome: number;
     totalLandOptionIncome: number;
     landOptionYield: number;
   };
@@ -231,6 +234,13 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   // Calculate land option yield (annual income as % of total project value)
   const landOptionYield = totalCapex > 0 ? (landOptionCostYear1 / totalCapex) * 100 : 0;
 
+  // Calculate yearly and total savings
+  const yearlySavings = (totalEnergy / inputs.projectLife) * inputs.offsetableEnergyCost;
+  const totalSavings = totalEnergy * inputs.offsetableEnergyCost;
+  
+  // Calculate yearly rental income
+  const yearlyRentalIncome = landOptionCostYear1;
+
   return {
     yearlyData,
     summary: {
@@ -248,7 +258,10 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
       irr,
       paybackPeriod,
       capexPerMW: totalCapex / inputs.mw,
-      annualSavings: (totalEnergy / inputs.projectLife) * inputs.offsetableEnergyCost, // Average annual generation * offsetable energy cost
+      annualSavings: yearlySavings,
+      yearlySavings,
+      totalSavings,
+      yearlyRentalIncome,
       totalLandOptionIncome,
       landOptionYield,
     }
