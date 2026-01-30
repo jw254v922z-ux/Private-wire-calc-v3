@@ -86,3 +86,9 @@
 - [x] Create new "Landowner" section with Total Yearly Land Options Income and Land Option Yield metric cards
 - [x] Keep "Landowner" tab in tabs area for detailed analysis
 - [x] Verify three separate metric sections display correctly on landing page
+
+
+### Phase 9: Land Option Calculation Fix
+- [x] Enable land option by default in calculator (£5,000/MW/year)
+- [x] Verify land option is properly included in OPEX calculation
+- [x] Test land option metrics calculate correctly (Total Yearly Land Options Income and Land Option Yield)

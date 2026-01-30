@@ -266,8 +266,8 @@ export const defaultInputs: SolarInputs = {
   developmentPremiumPerMW: 50000,
   developmentPremiumEnabled: true,
   developmentPremiumDiscount: 0,
-  landOptionCostPerMWYear: 0,
-  landOptionEnabled: false,
+  landOptionCostPerMWYear: 5000,
+  landOptionEnabled: true,
   landOptionDiscount: 0,
   costInflationRate: 2.5,
   opexPerMW: 15100, // 422800 / 28 = 15100
