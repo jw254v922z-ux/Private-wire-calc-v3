@@ -106,3 +106,11 @@
 - [x] Add yearly rental income calculation to calculator
 - [x] Update Offtaker banner to show Yearly Savings and Total Savings
 - [x] Update Landowner banner to show Yearly Rental Income and Total Rental Income
+
+
+### Phase 12: Landowner Yield and Stakeholder Value Distribution
+- [x] Add Land Rental Yield metric back to Landowner banner (3 metrics total)
+- [x] Create stakeholder value distribution chart showing proportional value
+- [x] Calculate proportional values: Project NPV, Offtaker Savings, Landowner Income
+- [x] Display chart on landing page below metric banners
+- [x] Test chart updates dynamically with parameter changes

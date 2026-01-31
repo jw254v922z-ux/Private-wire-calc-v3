@@ -18,6 +18,7 @@ import { GridConnectionCostBreakdown } from "../components/GridConnectionCostBre
 import { GridConnectionSliders, type GridConnectionCosts } from "../components/GridConnectionSliders";
 import { SensitivityHeatmap } from "../components/SensitivityHeatmap";
 import { CashFlowTable } from "../components/CashFlowTable";
+import { StakeholderValueChart } from "../components/StakeholderValueChart";
 import LandownerPage from "./Landowner";
 import { calculateSensitivityMatrix } from "@/lib/sensitivity";
 import { generatePDFReport } from "@/lib/pdfReport";
@@ -376,7 +377,7 @@ export default function Dashboard() {
           {/* Landowner Banner */}
           <div className="mt-4">
             <h3 className="text-sm font-semibold text-gray-400 mb-3">Landowner</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
             <MetricCard 
               title="Yearly Rental Income" 
               value={formatCurrency(results.summary.yearlyRentalIncome) + "/year"} 
@@ -389,9 +390,18 @@ export default function Dashboard() {
               icon={TrendingUp}
               className="bg-white/5 border-l-emerald-400 text-white border-white/10 backdrop-blur-sm"
             />
+            <MetricCard 
+              title="Land Rental Yield" 
+              value={results.summary.landOptionYield.toFixed(2) + "%"} 
+              icon={TrendingUp}
+              className="bg-white/5 border-l-blue-400 text-white border-white/10 backdrop-blur-sm"
+            />
             </div>
           </div>
         </div>
+        
+        {/* Stakeholder Value Distribution Chart */}
+        <StakeholderValueChart results={results} />
       </div>
 
       {guestMode && (
