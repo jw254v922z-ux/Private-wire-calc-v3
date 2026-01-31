@@ -13,9 +13,10 @@ export function StakeholderValueChart({ results }: StakeholderValueChartProps) {
   // Offtaker: Total Savings
   // Landowner: Total Rental Income
   
-  const projectValue = Math.abs(results.summary.totalDiscountedCashFlow);
-  const offtakerValue = results.summary.totalSavings;
-  const landownerValue = results.summary.totalLandOptionIncome;
+  // Show 0 for negative values
+  const projectValue = Math.max(0, results.summary.totalDiscountedCashFlow);
+  const offtakerValue = Math.max(0, results.summary.totalSavings);
+  const landownerValue = Math.max(0, results.summary.totalLandOptionIncome);
   
   const totalValue = projectValue + offtakerValue + landownerValue;
   

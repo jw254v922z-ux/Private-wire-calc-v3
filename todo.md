@@ -114,3 +114,8 @@
 - [x] Calculate proportional values: Project NPV, Offtaker Savings, Landowner Income
 - [x] Display chart on landing page below metric banners
 - [x] Test chart updates dynamically with parameter changes
+
+
+### Phase 13: Fix Negative Value Handling in Stakeholder Chart
+- [x] Update StakeholderValueChart to show 0 for negative Project NPV values
+- [x] Test chart displays correctly when NPV is negative
