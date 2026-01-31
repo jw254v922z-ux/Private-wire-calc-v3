@@ -235,8 +235,11 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   const landOptionYield = totalCapex > 0 ? (landOptionCostYear1 / totalCapex) * 100 : 0;
 
   // Calculate yearly and total savings
-  const yearlySavings = (totalEnergy / inputs.projectLife) * inputs.offsetableEnergyCost;
-  const totalSavings = totalEnergy * inputs.offsetableEnergyCost;
+  // Savings = (Avoided Cost - PPA Price) * Energy
+  // Only positive savings when PPA Price < Avoided Cost
+  const savingsPerMWh = Math.max(0, inputs.offsetableEnergyCost - inputs.powerPrice);
+  const yearlySavings = (totalEnergy / inputs.projectLife) * savingsPerMWh;
+  const totalSavings = totalEnergy * savingsPerMWh;
   
   // Calculate yearly rental income
   const yearlyRentalIncome = landOptionCostYear1;

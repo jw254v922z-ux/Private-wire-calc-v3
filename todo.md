@@ -119,3 +119,10 @@
 ### Phase 13: Fix Negative Value Handling in Stakeholder Chart
 - [x] Update StakeholderValueChart to show 0 for negative Project NPV values
 - [x] Test chart displays correctly when NPV is negative
+
+
+### Phase 14: Fix PPA Price Naming and Savings Calculation
+- [x] Rename "Power Price" to "PPA Price" in Dashboard UI
+- [x] Update calculator to use correct savings formula (max(0, avoided_cost - PPA_price) * energy)
+- [x] Test savings = 0 when PPA Price equals Offsetable Energy Cost
+- [x] Test savings > 0 when PPA Price < Offsetable Energy Cost

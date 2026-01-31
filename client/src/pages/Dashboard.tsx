@@ -639,7 +639,7 @@ export default function Dashboard() {
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <Label>Power Price (£/MWh)</Label>
+                      <Label>PPA Price (£/MWh)</Label>
                       <span className="text-sm font-mono">{formatNumberWithCommas(inputs.powerPrice)}</span>
                     </div>
                     <Input 
