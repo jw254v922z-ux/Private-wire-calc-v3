@@ -126,3 +126,10 @@
 - [x] Update calculator to use correct savings formula (max(0, avoided_cost - PPA_price) * energy)
 - [x] Test savings = 0 when PPA Price equals Offsetable Energy Cost
 - [x] Test savings > 0 when PPA Price < Offsetable Energy Cost
+
+
+### Phase 15: Remove Landowner Tab and Disable Login
+- [x] Remove "Landowner" tab from white banner tabs section
+- [x] Disable authentication requirement for public access
+- [x] Keep login functionality in code for future use
+- [x] Test page loads without login screen

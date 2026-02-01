@@ -229,7 +229,7 @@ export default function Dashboard() {
     document.body.removeChild(link);
   };
 
-  const [guestMode, setGuestMode] = useState(false);
+  const [guestMode, setGuestMode] = useState(true); // Public access - guest mode enabled by default
 
   if (!isAuthenticated && !guestMode) {
     return (
@@ -822,7 +822,7 @@ export default function Dashboard() {
                 <TabsTrigger value="cumulative">Cumulative Returns</TabsTrigger>
                 <TabsTrigger value="generation">Generation & Revenue</TabsTrigger>
                 <TabsTrigger value="sensitivity">Sensitivity Analysis</TabsTrigger>
-                <TabsTrigger value="landowner">Landowner</TabsTrigger>
+
               </TabsList>
               
               <TabsContent value="cashflow">
@@ -910,9 +910,6 @@ export default function Dashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="landowner">
-                <LandownerPage results={results} />
-              </TabsContent>
             </Tabs>
 
             {/* Detailed Table Preview - Only show on non-gridcosts tabs */}
