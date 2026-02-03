@@ -1,24 +1,30 @@
+import { useState } from 'react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SolarResults } from '@/lib/calculator';
 import { formatCurrency } from '@/lib/formatters';
+import { Button } from '@/components/ui/button';
 
 interface StakeholderValueChartProps {
   results: SolarResults;
 }
 
 export function StakeholderValueChart({ results }: StakeholderValueChartProps) {
+  const [showChart, setShowChart] = useState(true);
+
   // Calculate the proportional values
   // Project: Total Discounted NPV (absolute value for visualization)
   // Offtaker: Total Savings
   // Landowner: Total Rental Income
+  // Developer: Total Developer Premium
   
   // Show 0 for negative values
   const projectValue = Math.max(0, results.summary.totalDiscountedCashFlow);
   const offtakerValue = Math.max(0, results.summary.totalSavings);
   const landownerValue = Math.max(0, results.summary.totalLandOptionIncome);
+  const developerValue = Math.max(0, results.summary.totalDeveloperPremium);
   
-  const totalValue = projectValue + offtakerValue + landownerValue;
+  const totalValue = projectValue + offtakerValue + landownerValue + developerValue;
   
   const data = [
     {
@@ -36,9 +42,14 @@ export function StakeholderValueChart({ results }: StakeholderValueChartProps) {
       value: landownerValue,
       percentage: totalValue > 0 ? ((landownerValue / totalValue) * 100).toFixed(1) : 0,
     },
+    {
+      name: 'Developer',
+      value: developerValue,
+      percentage: totalValue > 0 ? ((developerValue / totalValue) * 100).toFixed(1) : 0,
+    },
   ];
   
-  const COLORS = ['#8b5cf6', '#10b981', '#f59e0b'];
+  const COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
   
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -57,37 +68,51 @@ export function StakeholderValueChart({ results }: StakeholderValueChartProps) {
   return (
     <Card className="bg-white/5 border-white/10 backdrop-blur-sm mt-6">
       <CardHeader>
-        <CardTitle className="text-white">Stakeholder Value Distribution</CardTitle>
-        <CardDescription className="text-gray-400">
-          Proportional value created for each party based on project NPV, offtaker savings, and landowner rental income
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-white">Stakeholder Value Distribution</CardTitle>
+            <CardDescription className="text-gray-400">
+              Proportional value created for each party based on project NPV, offtaker savings, landowner rental income, and developer premium
+            </CardDescription>
+          </div>
+          <Button
+            onClick={() => setShowChart(!showChart)}
+            variant="outline"
+            size="sm"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            {showChart ? 'Hide' : 'Show'} Chart
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percentage }) => `${name} (${percentage}%)`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        {showChart && (
+          <div className="w-full h-80 flex justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percentage }) => `${name} (${percentage}%)`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
         
         {/* Value breakdown table */}
-        <div className="mt-6 grid grid-cols-3 gap-4">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           {data.map((item, index) => (
             <div key={item.name} className="p-3 rounded bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">

@@ -133,3 +133,13 @@
 - [x] Disable authentication requirement for public access
 - [x] Keep login functionality in code for future use
 - [x] Test page loads without login screen
+
+
+### Phase 16: Developer Stakeholder and Centralized Chart
+- [x] Add Developer Premium calculation to summary
+- [x] Create Developer banner section with Developer Premium metric
+- [x] Update StakeholderValueChart to include Developer stakeholder
+- [x] Add toggle to show/hide stakeholder split pie chart
+- [x] Centralize pie chart on landing page
+- [x] Test all stakeholder metrics display correctly
+- [ ] Save checkpoint and push to GitHub

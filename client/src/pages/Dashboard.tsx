@@ -398,6 +398,19 @@ export default function Dashboard() {
             />
             </div>
           </div>
+
+          {/* Developer Banner */}
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-gray-400 mb-3">Developer</h3>
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
+            <MetricCard 
+              title="Developer Premium" 
+              value={formatCurrency(results.summary.totalDeveloperPremium)} 
+              icon={Coins}
+              className="bg-white/5 border-l-purple-400 text-white border-white/10 backdrop-blur-sm"
+            />
+            </div>
+          </div>
         </div>
         
         {/* Stakeholder Value Distribution Chart */}

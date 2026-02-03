@@ -68,6 +68,7 @@ export interface SolarResults {
     yearlyRentalIncome: number;
     totalLandOptionIncome: number;
     landOptionYield: number;
+    totalDeveloperPremium: number;
   };
 }
 
@@ -244,6 +245,13 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
   // Calculate yearly rental income
   const yearlyRentalIncome = landOptionCostYear1;
 
+  // Calculate total developer premium over project life (with inflation)
+  let totalDeveloperPremium = 0;
+  if (inputs.developmentPremiumEnabled) {
+    // Developer premium is a one-time cost in Year 0, but for stakeholder value it's the total amount
+    totalDeveloperPremium = developerPremiumAmount;
+  }
+
   return {
     yearlyData,
     summary: {
@@ -267,6 +275,7 @@ export function calculateSolarModel(inputs: SolarInputs): SolarResults {
       yearlyRentalIncome,
       totalLandOptionIncome,
       landOptionYield,
+      totalDeveloperPremium,
     }
   };
 }
